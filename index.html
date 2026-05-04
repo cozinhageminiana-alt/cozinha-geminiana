@@ -91,7 +91,6 @@
   .prato-item.selected .prato-preco { color: var(--verde); }
 
   .prato-qty { display: none; align-items: center; gap: 8px; flex-shrink: 0; }
-  .qty-btn:disabled { opacity: 0.3; cursor: not-allowed; }
   .prato-item.selected .prato-qty { display: flex; }
   .qty-btn { width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--verde); background: none; color: var(--verde); font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; line-height: 1; transition: background .1s; }
   .qty-btn:hover { background: var(--verde); color: #fff; }
@@ -252,18 +251,18 @@
   const db  = getFirestore(app);
 
   const LIMITES = {
-    'frango-mineiro': 10,
-    'carne-de-panela-da-nat': 9,
-    'strogonoff-de-frango': 9,
-    'feijo-porcudo': 9,
-    'chilli-de-inverno': 9,
-    'caldo-verde': 10,
-    'caponata-da-casa': 10,
-    'fradinho-carioca': 10,
-    'homus': 8,
-    'feijo-vermelho-da-casa': 3,
+    'frango-mineiro':              10,
+    'carne-de-panela-da-nat':       9,
+    'strogonoff-de-frango':         9,
+    'feijo-porcudo':                9,
+    'chilli-de-inverno':            9,
+    'fradinho-carioca':            10,
+    'caldo-verde':                 10,
+    'caponata-da-casa':            10,
+    'homus':                        8,
+    'feijo-vermelho-da-casa':       3,
     'feijo-carioquinha-com-bacon': 10,
-    'frango-desfiado-suculento': 5,
+    'frango-desfiado-suculento':    5,
   };
   function getLimite(pratoId) { return LIMITES[pratoId] ?? 10; }
   const COL    = 'estoque';
@@ -281,27 +280,42 @@
   // Aplica estado esgotado/disponível visualmente
   function aplicaEstado(el, vendido, pratoId) {
     const disponivel = getLimite(pratoId) - vendido;
-    const esgotado = disponivel <= 0;
+    const esgotado   = disponivel <= 0;
+
+    // Classe visual
     el.classList.toggle('esgotado', esgotado);
+
+    // Bloquear card inteiro quando esgotado
     el.style.pointerEvents = esgotado ? 'none' : '';
+    el.style.cursor        = esgotado ? 'not-allowed' : '';
+
+    // Desmarcar se estava selecionado e esgotou
+    if (esgotado && el.classList.contains('selected')) {
+      el.classList.remove('selected');
+      if (typeof atualizaResumo === 'function') atualizaResumo();
+    }
+
+    // Badge de status
     let badge = el.querySelector('.badge-estoque');
     if (!badge) {
-      badge = document.createElement('span');
+      badge = document.createElement('div');
       badge.className = 'badge-estoque';
-      el.querySelector('.prato-info').appendChild(badge);
+      badge.style.cssText = 'font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:2px 8px;border-radius:20px;margin-top:4px;display:inline-block;';
+      const infoEl = el.querySelector('.prato-info') || el.querySelector('.prato-nome')?.parentElement;
+      if (infoEl) infoEl.appendChild(badge);
     }
+
     if (esgotado) {
-      badge.textContent = 'Esgotado';
-      badge.style.cssText = 'display:inline-block;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;background:#FCEBEB;color:#791F1F;padding:2px 8px;border-radius:20px;margin-top:4px;';
-      if (el.classList.contains('selected')) {
-        el.classList.remove('selected');
-        if (window.atualizaResumo) window.atualizaResumo();
-      }
+      badge.textContent      = '🔴 Esgotado';
+      badge.style.background = '#FCEBEB';
+      badge.style.color      = '#791F1F';
+    } else if (disponivel <= 3) {
+      badge.textContent      = `⚠️ Últimas ${disponivel}!`;
+      badge.style.background = '#FFF8E1';
+      badge.style.color      = '#7B6000';
     } else {
-      badge.textContent = disponivel <= 3 ? `Últimas ${disponivel} unidades!` : '';
-      badge.style.cssText = disponivel <= 3
-        ? 'display:inline-block;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;background:#FFF8E1;color:#7B6000;padding:2px 8px;border-radius:20px;margin-top:4px;'
-        : '';
+      badge.textContent      = '';
+      badge.style.background = '';
     }
   }
 
@@ -511,7 +525,6 @@
               <option>Rocha</option>
               <option>Encantado</option>
               <option>Méier</option>
-              <option>Grande Méier</option>
               <option>Cachambi</option>
               <option>Água Santa</option>
               <option>Todos os Santos</option>
@@ -525,11 +538,6 @@
               <option>Botafogo</option>
               <option>Humaitá</option>
               <option>Urca</option>
-            </optgroup>
-            <optgroup label="── Barra da Tijuca e Região">
-              <option>Barra da Tijuca</option>
-              <option>Recreio dos Bandeirantes</option>
-              <option>Jacarepaguá</option>
             </optgroup>
             <optgroup label="── Fora da área de entrega">
               <option value="fora">Meu bairro não está na lista</option>
@@ -628,38 +636,37 @@ const semanaAtiva = '1'; // ← ALTERE AQUI para mudar o cardápio
 const CARDAPIOS = {
     '1': {
     label: "Cardápio 1",
-    descricao: "Entrega durante a semana · Pedidos pelo site",
+    descricao: "Entrega sexta-feira · Pedidos até quarta-feira",
     grupos: [
       {
         cat: "Prato Feito — marmita completa 🍽️",
-        info: "Prato principal + arroz + feijão carioquinha. Tudo no mesmo pote, feito com carinho.",
+        info: "Prato principal + arroz + feijão. Tudo no mesmo pote, feito com carinho.",
         pratos: [
-          { nome: "Frango mineiro",         linha: "dia", preco: 27, desc: "Sobrecoxa em cubos com quiabo ao molho caseiro, acompanha arroz integral e feijão carioquinha", qtd: "400g" },
-          { nome: "Carne de Panela da Nat", linha: "dia", preco: 30, desc: "Desmanchando, com aipim macio e gosto de comida feita sem pressa, acompanha arroz e feijão", qtd: "400g" },
+          { nome: "Frango mineiro",         linha: "dia", preco: 27, desc: "Sobrecoxa em cubos com quiabo ao molho caseiro, acompanha arroz integral e feijão carioquinha", qtd: "560g" },
+          { nome: "Carne de Panela da Nat", linha: "dia", preco: 30, desc: "Desmanchando, com aipim macio e gosto de comida feita sem pressa, acompanha arroz e feijão", qtd: "560g" },
         ]
       },
       {
         cat: "Pratos principais 🥘",
         pratos: [
-          { nome: "Strogonoff de Frango", linha: "dia",    preco: 42, desc: "Sobrecoxa de frango com shitake fresco e creme de leite. Reaquecer em fogo baixo mexendo sempre", qtd: "400g" },
-          { nome: "Feijão porcudo",       linha: "dia",    preco: 36, desc: "Feijão vermelho com costela suína, bacon defumado e linguiça calabresa", qtd: "450g" },
-          { nome: "Chilli de Inverno",    linha: "intl",   preco: 33, desc: "Encorpado, levemente picante e feito pra aquecer por dentro", qtd: "400g" },
-          { nome: "Caldo verde",          linha: "caldos", preco: 20, desc: "Cremoso, aromático e feito pra desacelerar o dia", qtd: "350ml" },
+          { nome: "Strogonoff de Frango", linha: "dia",     preco: 42, desc: "Sobrecoxa de frango com shitake fresco e creme de leite. Reaquecer em fogo baixo mexendo sempre", qtd: "400g" },
+          { nome: "Feijão porcudo",       linha: "dia",     preco: 36, desc: "Feijão vermelho com costela suína, bacon defumado e linguiça calabresa", qtd: "450g" },
+          { nome: "Chilli de Inverno",    linha: "intl",    preco: 33, desc: "Encorpado, levemente picante e feito pra aquecer por dentro", qtd: "400g" },
+          { nome: "Fradinho carioca",     linha: "petisco", preco: 26, desc: "Feijão fradinho com carne seca, banana da terra, bacon e queijo coalho", qtd: "400g" },
+          { nome: "Caldo verde",          linha: "caldos",  preco: 20, desc: "Cremoso, aromático e feito pra desacelerar o dia", qtd: "350ml" },
         ]
       },
       {
         cat: "Petiscos & Aperitivos 🥢",
         pratos: [
-          { nome: "Caponata da Casa",  linha: "petisco", preco: 25, desc: "Berinjela macia, agridoce, picante na medida — feita com azeite de verdade", qtd: "200g" },
-          { nome: "Fradinho carioca",  linha: "petisco", preco: 32, desc: "Feijão fradinho com carne seca, banana da terra, bacon e queijo coalho", qtd: "400g" },
-          { nome: "Homus",             linha: "petisco", preco: 18, desc: "Grão de bico cremoso com tahine, limão e azeite. Artesanal, sem conservante", qtd: "300g" },
+          { nome: "Caponata da Casa", linha: "petisco", preco: 25, desc: "Berinjela macia, agridoce, picante na medida e cheia de personalidade", qtd: "200g" },
+          { nome: "Homus",            linha: "petisco", preco: 18, desc: "Grão de bico cremoso com tahine, limão e azeite. Artesanal, sem conservante", qtd: "300g" },
         ]
       },
       {
         cat: "Acompanhamentos 🫘",
         pratos: [
-          { nome: "Feijão vermelho da casa",          linha: "dia", preco: 16, desc: "Feijão vermelho temperado, simples e gostoso", qtd: "250g" },
-          { nome: "Feijão carioquinha com bacon",     linha: "dia", preco: 16, desc: "Feijão carioquinha com bacon e linguiça calabresa, bem temperado", qtd: "250g" },
+          { nome: "Feijão vermelho da casa", linha: "dia", preco: 16, desc: "Feijão vermelho temperado, simples e gostoso", qtd: "250g" },
         ]
       },
       {
@@ -816,7 +823,7 @@ cd.grupos.forEach(grupo => {
   }
   grupo.pratos.forEach(p => {
     html += `
-    <div class="prato-item" data-nome="${p.nome}" data-preco="${p.preco}" onclick="togglePrato(this, event)">
+    <div class="prato-item" data-nome="${p.nome}" data-preco="${p.preco}" onclick="togglePrato(this)">
       <div class="prato-check"><svg width="10" height="8" viewBox="0 0 10 8"><path d="M1 4l3 3 5-5" stroke="#fff" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
       <div class="prato-info">
         <div class="prato-nome">${p.nome}</div>
@@ -964,22 +971,23 @@ function selectPag(el) {
 }
 
 function togglePrato(el, e) {
-  if (e && e.target && e.target.closest('.prato-qty')) return;
-  if (e && e.target && e.target.tagName === 'BUTTON') return;
+  if (!el) return;
+  if (e && e.target && (e.target.classList.contains('qty-btn') || e.target.closest('.prato-qty'))) return;
   if (el.classList.contains('esgotado')) return;
   el.classList.toggle('selected');
-  if (el.classList.contains('selected')) el.querySelector('.qty-num').textContent = '1';
-  atualizaResumo();
+  if (el.classList.contains('selected')) {
+    const numEl = el.querySelector('.qty-num');
+    if (numEl) numEl.textContent = '1';
+    el.dataset.qty = '1';
+  }
+  if (typeof atualizaResumo === 'function') atualizaResumo();
 }
 function changeQty(e, btn, delta) {
   e.stopPropagation();
-  const item  = btn.closest('.prato-item');
-  const num   = item.querySelector('.qty-num');
-  const pratoId = item.dataset.nome.toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'');
-  const limite  = getLimite(pratoId);
+  const item = btn.closest('.prato-item');
+  const num  = item.querySelector('.qty-num');
   let q = parseInt(num.textContent) + delta;
   if (q < 1) { item.classList.remove('selected'); q = 1; }
-  if (q > limite) { q = limite; }
   num.textContent = q;
   atualizaResumo();
 }
