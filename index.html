@@ -816,7 +816,7 @@ cd.grupos.forEach(grupo => {
   }
   grupo.pratos.forEach(p => {
     html += `
-    <div class="prato-item" data-nome="${p.nome}" data-preco="${p.preco}" onclick="togglePrato(this)">
+    <div class="prato-item" data-nome="${p.nome}" data-preco="${p.preco}" onclick="togglePrato(this, event)">
       <div class="prato-check"><svg width="10" height="8" viewBox="0 0 10 8"><path d="M1 4l3 3 5-5" stroke="#fff" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
       <div class="prato-info">
         <div class="prato-nome">${p.nome}</div>
@@ -963,8 +963,10 @@ function selectPag(el) {
   atualizaResumo();
 }
 
-function togglePrato(el) {
-  if (event.target.closest('.prato-qty')) return;
+function togglePrato(el, e) {
+  if (e && e.target && e.target.closest('.prato-qty')) return;
+  if (e && e.target && e.target.tagName === 'BUTTON') return;
+  if (el.classList.contains('esgotado')) return;
   el.classList.toggle('selected');
   if (el.classList.contains('selected')) el.querySelector('.qty-num').textContent = '1';
   atualizaResumo();
