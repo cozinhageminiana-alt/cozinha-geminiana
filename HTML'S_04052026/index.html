@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cozinha Geminiana — Fazer Pedido</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --verde:      #2E8B57;
+    --verde-med:  #1A5C38;
+    --verde-cl:   #C8EDD8;
+    --bege:       #FFFFF0;
+    --bege-cl:    #FFFFF8;
+    --laranja:    #E8651A;
+    --laranja-cl: #FDE8D8;
+    --amarelo:    #F5A623;
+    --amarelo-cl: #FFF3CD;
+    --verde-esc:  #1A2C1A;
+    --cinza:      #F1EFE8;
+    --cinza-med:  #D3D1C7;
+    --cinza-esc:  #6B6B65;
+    --texto:      #1A2C1A;
+    --texto-muted:#888780;
+  }
+
+  body { font-family: 'Lato', sans-serif; background: var(--bege-cl); color: var(--texto); min-height: 100vh; }
+
+  /* ── HEADER ── */
+  header { background: var(--verde-esc); padding: 20px 24px 18px; text-align: center; }
+  header .logo-wrap { display: flex; align-items: center; justify-content: center; gap: 14px; margin-bottom: 6px; }
+  header .logo-icon { flex-shrink: 0; }
+  header .logo-text { text-align: left; }
+  header .logo-cozinha { font-family: 'Playfair Display', serif; font-size: 26px; color: var(--laranja); letter-spacing: 0.06em; line-height: 1; font-weight: 700; }
+  header .logo-geminiana { font-family: 'Playfair Display', serif; font-size: 19px; color: #F5F0E0; letter-spacing: 0.04em; line-height: 1.2; }
+  header .sub { font-size: 11px; letter-spacing: 0.2em; color: #6B9E6B; text-transform: uppercase; margin-top: 2px; }
+
+  /* ── AVISO SEMANA ── */
+  .aviso-semana { background: #FFF8E1; border-bottom: 1px solid #FFD54F; padding: 10px 20px; text-align: center; font-size: 12px; color: #7B6000; letter-spacing: 0.03em; }
+
+  /* ── LAYOUT ── */
+  .container { max-width: 720px; margin: 0 auto; padding: 28px 20px 60px; }
+
+  /* ── COMO FUNCIONA ── */
+  .como-funciona { background: var(--verde-esc); border-radius: 12px; padding: 22px 24px; margin-bottom: 20px; }
+  .como-funciona-titulo { font-family: 'Playfair Display', serif; font-size: 18px; color: #F0E8D5; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+  .como-funciona-steps { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+  .cf-step { display: flex; align-items: flex-start; gap: 12px; }
+  .cf-num { width: 24px; height: 24px; border-radius: 50%; background: rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #F0E8D5; flex-shrink: 0; margin-top: 1px; }
+  .cf-text { font-size: 12px; color: #C8DCC0; line-height: 1.55; }
+  .cf-text strong { color: #F0E8D5; font-weight: 700; }
+  .cf-destaque { background: rgba(255,255,255,0.08); border-radius: 8px; padding: 11px 14px; border-left: 3px solid #D93B2B; }
+  .cf-destaque p { font-size: 12px; color: #C8DCC0; line-height: 1.6; }
+  .cf-destaque p strong { color: #F0E8D5; }
+
+  /* ── TAXA ENTREGA ── */
+  .taxa-entrega { background: var(--laranja-cl); border: 1px solid var(--laranja); border-radius: 8px; padding: 10px 14px; margin-bottom: 16px; font-size: 12px; color: #7A3A10; display: flex; align-items: center; gap: 8px; line-height: 1.5; }
+
+  /* ── SEÇÕES ── */
+  .section { background: #fff; border-radius: 12px; border: 0.5px solid var(--cinza-med); padding: 24px; margin-bottom: 20px; }
+  .section-title { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 400; color: var(--laranja); margin-bottom: 4px; }
+  .section-sub { font-size: 12px; color: var(--texto-muted); margin-bottom: 18px; letter-spacing: 0.03em; }
+
+  /* ── PAINEL DE CARDÁPIO ── */
+  .cardapio-painel { display: block; }
+
+  /* ── CATEGORIAS ── */
+  .cat-label { font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--verde-esc); font-weight: 700; margin: 20px 0 10px; display: flex; align-items: center; gap: 8px; }
+  .cat-label::after { content: ''; flex: 1; height: 0.5px; background: var(--cinza-med); }
+  .cat-label:first-of-type { margin-top: 0; }
+
+  /* ── PRATOS ── */
+  .prato-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border-radius: 8px; border: 0.5px solid var(--cinza-med); margin-bottom: 7px; cursor: pointer; transition: border-color .15s, background .15s; background: #fff; flex-wrap: nowrap; }
+  .prato-item.esgotado { background: #FAFAFA; border-color: #E8E4E0; opacity: 0.65; cursor: not-allowed; }
+  .prato-item.esgotado .prato-nome { font-size: 14px; font-weight: 600; color: var(--texto); line-height: 1.3; }
+  .prato-item:hover { border-color: var(--verde-med); background: var(--bege-cl); }
+  .prato-item.selected { border-color: var(--verde); background: var(--verde-cl); }
+
+  .prato-check { width: 18px; height: 18px; border-radius: 4px; border: 1.5px solid var(--cinza-med); flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all .15s; }
+  .prato-item.selected .prato-check { background: var(--verde); border-color: var(--verde); }
+  .prato-check svg { display: none; }
+  .prato-item.selected .prato-check svg { display: block; }
+
+  .prato-info { flex: 1; min-width: 0; overflow: hidden; }
+  .prato-nome { font-size: 13px; font-weight: 400; color: var(--texto); }
+  .prato-desc { font-size: 11px; color: var(--texto-muted); margin-top: 2px; line-height: 1.4; word-break: break-word; }
+  .prato-qtd  { font-size: 10px; color: var(--verde-med); margin-top: 3px; font-weight: 500; letter-spacing: 0.02em; word-break: break-word; }
+  .prato-preco { font-size: 13px; font-weight: 700; color: var(--verde); flex-shrink: 0; white-space: nowrap; text-align: right; }
+  .prato-item.selected .prato-preco { color: var(--verde); }
+
+  .prato-qty { display: none; align-items: center; gap: 8px; flex-shrink: 0; }
+  .prato-item.selected .prato-qty { display: flex; }
+  .qty-btn { width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--verde); background: none; color: var(--verde); font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; line-height: 1; transition: background .1s; }
+  .qty-btn:hover { background: var(--verde); color: #fff; }
+  .qty-num { font-size: 14px; font-weight: 700; color: var(--verde); min-width: 18px; text-align: center; }
+
+  /* ── BADGES ── */
+  .badge-linha { display: none; }
+  .badge-premium  { background: #FAECE7; color: #712B13; }
+  .badge-dia      { background: #EAF3DE; color: #27500A; }
+  .badge-intl     { background: #E6F1FB; color: #0C447C; }
+  .badge-petisco  { background: #FAEEDA; color: #633806; }
+  .badge-saude    { background: #E1F5EE; color: #085041; }
+  .badge-caldos   { background: #EDE8F5; color: #3C3489; }
+
+  /* ── SELETOR DE BAIRRO ── */
+  .bairro-fora { display: none; background: #FCEBEB; border: 1px solid #F09595; border-radius: 8px; padding: 12px 16px; margin-top: 10px; font-size: 12px; color: #791F1F; line-height: 1.6; }
+  .bairro-fora.visible { display: block; }
+  .bairro-fora-wpp { display: inline-flex; align-items: center; gap: 7px; margin-top: 10px; background: #25D366; color: #fff; font-size: 12px; font-weight: 700; padding: 9px 16px; border-radius: 8px; text-decoration: none; letter-spacing: 0.04em; }
+  .bairro-fora-wpp:hover { background: #1DAA56; }
+  .bairro-fora-wpp svg { flex-shrink: 0; }
+
+  /* ── COMO FUNCIONA ── */
+  .como-funciona { background: var(--verde-esc); border-radius: 12px; padding: 22px 24px; margin-bottom: 20px; }
+  .como-titulo { font-family: 'Playfair Display', serif; font-size: 17px; color: #F0E8D5; font-weight: 400; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+  .como-titulo svg { flex-shrink: 0; }
+  .como-passos { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+  .como-passo { display: flex; gap: 10px; align-items: flex-start; }
+  .como-num { width: 22px; height: 22px; border-radius: 50%; background: rgba(255,255,255,0.12); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #F0E8D5; flex-shrink: 0; margin-top: 1px; }
+  .como-texto { font-size: 12px; color: #C8DCC0; line-height: 1.55; }
+  .como-texto strong { color: #F0E8D5; font-weight: 700; }
+  .como-destaque { background: rgba(255,255,255,0.08); border-radius: 8px; padding: 10px 14px; display: flex; align-items: center; gap: 10px; }
+  .como-destaque svg { flex-shrink: 0; }
+  .como-destaque p { font-size: 12px; color: #8FA882; line-height: 1.55; }
+  .como-destaque p strong { color: #F0E8D5; display: block; margin-bottom: 1px; font-size: 13px; }
+
+  /* ── PEDIDO MÍNIMO ── */
+  .minimo-aviso { background: var(--bege); border-radius: 8px; padding: 10px 14px; font-size: 11px; color: var(--cinza-esc); margin-bottom: 16px; border-left: 3px solid var(--laranja); }
+  .minimo-aviso strong { color: var(--laranja); }
+
+  /* ── AGENDAMENTO ── */
+  .semanas-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 18px; }
+  .entrega-grupo { margin-bottom: 18px; }
+  .entrega-grupo-label { font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--texto-muted); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+  .entrega-grupo-label::after { content: ''; flex: 1; height: 0.5px; background: var(--cinza-med); }
+  .semana-card { border: 1px solid var(--cinza-med); border-radius: 8px; padding: 12px; cursor: pointer; text-align: center; transition: all .15s; background: #fff; }
+  .semana-card:hover { border-color: var(--verde-med); background: var(--bege-cl); }
+  .semana-card.selected { border-color: var(--verde); background: var(--verde-cl); }
+  .semana-card.bloqueada { opacity: .45; cursor: not-allowed; background: var(--cinza); }
+  .semana-data { font-size: 13px; font-weight: 700; color: var(--texto); }
+  .semana-prazo { font-size: 10px; color: var(--texto-muted); margin-top: 3px; }
+  .semana-status { font-size: 9px; margin-top: 5px; letter-spacing: 0.1em; text-transform: uppercase; }
+  .status-aberto  { color: var(--verde-med); }
+  .status-fechado { color: var(--texto-muted); }
+
+  .turnos-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .turno-card { border: 1px solid var(--cinza-med); border-radius: 8px; padding: 14px; cursor: pointer; text-align: center; transition: all .15s; background: #fff; }
+  .turno-card:hover { border-color: var(--verde-med); background: var(--bege-cl); }
+  .turno-card.selected { border-color: var(--verde); background: var(--verde-cl); }
+  .turno-hora { font-size: 15px; font-weight: 700; color: var(--texto); }
+  .turno-desc { font-size: 11px; color: var(--texto-muted); margin-top: 3px; }
+
+  /* ── DADOS PESSOAIS ── */
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .form-full { grid-column: 1 / -1; }
+  .field label { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--texto-muted); display: block; margin-bottom: 5px; }
+  .field input, .field textarea, .field select {
+    width: 100%; padding: 10px 12px; border: 1px solid var(--cinza-med);
+    border-radius: 8px; font-family: 'Lato', sans-serif; font-size: 13px;
+    color: var(--texto); background: var(--bege-cl); outline: none; transition: border-color .15s;
+  }
+  .field input:focus, .field textarea:focus { border-color: var(--verde); background: #fff; }
+  .field textarea { resize: vertical; min-height: 70px; }
+
+  /* ── PAGAMENTO ── */
+  .pagamento-opts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .pag-card.destaque { border: 2px solid var(--verde); position: relative; }
+  .pag-badge { font-size: 9px; background: var(--verde); color: #F0E8D5; padding: 2px 8px; border-radius: 10px; position: absolute; top: -10px; left: 50%; transform: translateX(-50%); white-space: nowrap; letter-spacing: 0.08em; }
+  .pag-card { border: 1px solid var(--cinza-med); border-radius: 8px; padding: 14px; cursor: pointer; text-align: center; transition: all .15s; background: #fff; }
+  .pag-card:hover { border-color: var(--verde-med); background: var(--bege-cl); }
+  .pag-card.selected { border-color: var(--verde); background: var(--verde-cl); }
+  .pag-nome { font-size: 13px; font-weight: 700; color: var(--texto); }
+  .pag-desc { font-size: 11px; color: var(--texto-muted); margin-top: 3px; }
+
+  /* ── RESUMO ── */
+  .resumo { background: var(--amarelo-cl); border: 1px solid var(--amarelo); border-radius: 12px; padding: 20px 24px; margin-bottom: 20px; display: none; }
+  .resumo.visible { display: block; }
+  .resumo-title { font-family: 'Playfair Display', serif; font-size: 16px; color: var(--laranja); margin-bottom: 12px; }
+  .resumo-linha { display: flex; justify-content: space-between; font-size: 13px; padding: 5px 0; border-bottom: 0.5px solid var(--amarelo); }
+  .resumo-linha:last-child { border: none; font-weight: 700; font-size: 15px; margin-top: 6px; padding-top: 8px; }
+  .resumo-label { color: var(--cinza-esc); }
+  .resumo-val { color: var(--texto); }
+  .resumo-total-val { color: var(--laranja); }
+
+  /* ── BTN ENVIAR ── */
+  .btn-enviar { width: 100%; padding: 16px; background: var(--verde); color: #fff; font-family: 'Playfair Display', serif; font-size: 16px; border: none; border-radius: 10px; cursor: pointer; letter-spacing: 0.06em; transition: background .15s; }
+  .btn-enviar:hover { background: var(--verde-med); }
+  .btn-enviar:disabled { background: var(--cinza-med); cursor: not-allowed; color: var(--texto-muted); }
+
+  /* ── SUCESSO ── */
+  .sucesso { display: none; text-align: center; padding: 48px 24px; }
+  .sucesso.visible { display: block; }
+  .sucesso-icon { width: 56px; height: 56px; background: var(--verde-cl); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; }
+  .sucesso h2 { font-family: 'Playfair Display', serif; font-size: 24px; color: var(--laranja); margin-bottom: 8px; }
+  .sucesso p { font-size: 13px; color: var(--texto-muted); line-height: 1.7; }
+  .sucesso .wpp-btn { display: inline-flex; align-items: center; gap: 10px; margin-top: 8px; background: #25D366; color: #fff; padding: 16px 32px; border-radius: 10px; font-size: 15px; font-weight: 700; text-decoration: none; letter-spacing: 0.05em; }
+  .sucesso .wpp-btn:hover { background: #1DAA56; }
+  .sucesso .aviso-wpp { background: #FFF8E1; border: 1px solid #FFD54F; border-radius: 8px; padding: 12px 16px; margin: 16px 0 8px; font-size: 12px; color: #7B6000; line-height: 1.6; }
+  .sucesso .aviso-wpp strong { display: block; font-size: 13px; margin-bottom: 3px; color: #5A4500; }
+
+  .erro-msg { font-size: 11px; color: #A32D2D; margin-top: 4px; display: none; }
+  .field.erro input, .field.erro select { border-color: #E24B4A; }
+  .field.erro .erro-msg { display: block; }
+
+  /* ── LEGENDA DE LINHAS ── */
+  .legenda { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+  .legenda-item { display: flex; align-items: center; gap: 5px; font-size: 10px; color: var(--texto-muted); }
+
+  @media (max-width: 500px) {
+    .form-grid { grid-template-columns: 1fr; }
+    .form-full { grid-column: 1; }
+    .turnos-grid { grid-template-columns: 1fr; }
+    .pagamento-opts { grid-template-columns: 1fr; }
+    .prato-item { flex-wrap: wrap; }
+  }
+
+  @media (max-width: 480px) {
+    .prato-check  { width: 16px; height: 16px; flex-shrink: 0; }
+    .prato-nome   { font-size: 13px; }
+    .prato-desc   { font-size: 10px; }
+    .prato-qtd    { font-size: 10px; }
+    .prato-preco  { font-size: 12px; }
+    .qty-btn      { width: 22px; height: 22px; font-size: 14px; }
+    .qty-num      { font-size: 12px; }
+    .prato-item   { padding: 8px 10px; gap: 8px; }
+    .cat-title    { font-size: 13px; }
+    .semana-desc  { font-size: 11px; }
+    .pag-card     { padding: 10px 12px; }
+    .pag-nome     { font-size: 13px; }
+    .pag-desc     { font-size: 10px; }
+    .btn-enviar   { font-size: 14px; padding: 14px; }
+  }
+</style>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+  import { getFirestore, doc, getDoc, updateDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBg0Nw5UqGKVtMq6Q34_RUaoZzhawy0OIs",
+    authDomain: "cozinhageminiana-1dee7.firebaseapp.com",
+    projectId: "cozinhageminiana-1dee7",
+    storageBucket: "cozinhageminiana-1dee7.firebasestorage.app",
+    messagingSenderId: "181751393390",
+    appId: "1:181751393390:web:e9ccf53a4657a12649ca7f",
+    measurementId: "G-FH5KD1KN9Z"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db  = getFirestore(app);
+
+  const LIMITES = {
+    'frango-mineiro': 10,
+    'carne-de-panela-da-nat': 9,
+    'strogonoff-de-frango': 9,
+    'feijo-porcudo': 9,
+    'chilli-de-inverno': 9,
+    'fradinho-carioca': 10,
+    'caldo-verde': 10,
+    'caponata-da-casa': 10,
+    'homus': 8,
+    'feijo-vermelho-da-casa': 3,
+    'frango-desfiado-suculento': 5,
+  };
+  function getLimite(pratoId) { return LIMITES[pratoId] ?? 10; }
+  const COL    = 'estoque';
+
+  // Garante que o doc existe com estoque inicial
+  async function garanteEstoque(pratoId) {
+    const ref = doc(db, COL, pratoId);
+    const snap = await getDoc(ref);
+    if (!snap.exists()) {
+      await setDoc(ref, { vendido: 0 });
+    }
+    return snap.exists() ? snap.data().vendido : 0;
+  }
+
+  // Aplica estado esgotado/disponível visualmente
+  function aplicaEstado(el, vendido, pratoId) {
+    const disponivel = getLimite(pratoId) - vendido;
+    const esgotado = disponivel <= 0;
+    el.classList.toggle('esgotado', esgotado);
+    el.style.pointerEvents = esgotado ? 'none' : '';
+    let badge = el.querySelector('.badge-estoque');
+    if (!badge) {
+      badge = document.createElement('span');
+      badge.className = 'badge-estoque';
+      el.querySelector('.prato-info').appendChild(badge);
+    }
+    if (esgotado) {
+      badge.textContent = 'Esgotado';
+      badge.style.cssText = 'display:inline-block;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;background:#FCEBEB;color:#791F1F;padding:2px 8px;border-radius:20px;margin-top:4px;';
+      if (el.classList.contains('selected')) {
+        el.classList.remove('selected');
+        if (window.atualizaResumo) window.atualizaResumo();
+      }
+    } else {
+      badge.textContent = disponivel <= 3 ? `Últimas ${disponivel} unidades!` : '';
+      badge.style.cssText = disponivel <= 3
+        ? 'display:inline-block;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;background:#FFF8E1;color:#7B6000;padding:2px 8px;border-radius:20px;margin-top:4px;'
+        : '';
+    }
+  }
+
+  // Monitora estoque em tempo real para todos os pratos visíveis
+  window.monitoraEstoque = function() {
+    document.querySelectorAll('.prato-item').forEach(async el => {
+      const pratoId = el.dataset.nome.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+      await garanteEstoque(pratoId);
+      const ref = doc(db, COL, pratoId);
+      onSnapshot(ref, snap => {
+        if (snap.exists()) aplicaEstado(el, snap.data().vendido, pratoId);
+      });
+    });
+  };
+
+  // Desconta estoque ao confirmar pedido
+  window.descontaEstoque = async function(pratos) {
+    for (const p of pratos) {
+      const pratoId = p.nome.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+      const ref = doc(db, COL, pratoId);
+      const snap = await getDoc(ref);
+      const atual = snap.exists() ? snap.data().vendido : 0;
+      await updateDoc(ref, { vendido: atual + p.qty });
+    }
+  };
+
+  // Inicia monitoramento quando DOM estiver pronto
+  document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => window.monitoraEstoque(), 500);
+  });
+</script>
+</head>
+<body>
+
+<header>
+  <div class="logo-wrap">
+    <!-- Logo SVG: garfo + faca formando símbolo Gêmeos -->
+    <div class="logo-icon">
+      <svg width="44" height="54" viewBox="0 0 44 54">
+        <!-- Garfo -->
+        <line x1="12" y1="3" x2="12" y2="51" stroke="#F0E8D5" stroke-width="2.8" stroke-linecap="round"/>
+        <line x1="6"  y1="3" x2="6"  y2="16" stroke="#F0E8D5" stroke-width="2"   stroke-linecap="round"/>
+        <line x1="9"  y1="3" x2="9"  y2="18" stroke="#F0E8D5" stroke-width="2"   stroke-linecap="round"/>
+        <line x1="15" y1="3" x2="15" y2="18" stroke="#F0E8D5" stroke-width="2"   stroke-linecap="round"/>
+        <line x1="18" y1="3" x2="18" y2="16" stroke="#F0E8D5" stroke-width="2"   stroke-linecap="round"/>
+        <path d="M6 16 Q6 22 12 22 Q18 22 18 16" fill="none" stroke="#F0E8D5" stroke-width="2" stroke-linecap="round"/>
+        <!-- Barras horizontais Gêmeos -->
+        <rect x="4"  y="28" width="36" height="3.5" rx="1.75" fill="#F0E8D5"/>
+        <rect x="4"  y="38" width="36" height="3.5" rx="1.75" fill="#F0E8D5"/>
+        <!-- Faca -->
+        <line x1="32" y1="3" x2="32" y2="51" stroke="#F0E8D5" stroke-width="2.8" stroke-linecap="round"/>
+        <path d="M32 3 Q42 10 42 22 Q42 28 32 30" fill="none" stroke="#F0E8D5" stroke-width="2.2" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div class="logo-text">
+      <div class="logo-cozinha">COZINHA</div>
+      <div class="logo-geminiana">Geminiana</div>
+    </div>
+  </div>
+  <div class="sub">Bistrô online · Congelados artesanais · Pedidos com agendamento</div>
+</header>
+
+<div class="aviso-semana" id="aviso-semana"></div>
+
+<div class="container">
+
+  <!-- COMO FUNCIONA — aparece antes de tudo -->
+  <div style="background:#1A2C1A;border-radius:14px;padding:24px;margin-bottom:22px;">
+
+    <p style="font-family:'Playfair Display',serif;font-size:19px;color:#F5F0E0;margin:0 0 6px;">Bem-vinda à Cozinha Geminiana! 🌿</p>
+    <p style="font-size:12px;color:#6B9E6B;letter-spacing:0.1em;text-transform:uppercase;margin:0 0 18px;">Aqui é diferente — e a gente te explica</p>
+
+    <p style="font-size:13px;color:#C8DCC0;line-height:1.8;margin:0 0 18px;">
+      Isso não é um site de loja comum — é uma <strong style="color:#F5A623;">comanda digital</strong>!
+      Você monta seu pedido aqui, e no fim ele vai direto para o WhatsApp da <strong style="color:#F5F0E0;">Nat</strong>, que confirma tudo com você pessoalmente. Simples, humano e sem complicação. 😊
+    </p>
+
+    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:18px;">
+      <div style="display:flex;gap:12px;align-items:flex-start;">
+        <div style="width:26px;height:26px;border-radius:50%;background:#E8651A;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;">1</div>
+        <p style="font-size:12px;color:#C8DCC0;line-height:1.6;margin:3px 0 0;"><strong style="color:#F5F0E0;">Escolha seus pratos</strong> e a quantidade. O cardápio muda a cada 15 dias com novidades!</p>
+      </div>
+      <div style="display:flex;gap:12px;align-items:flex-start;">
+        <div style="width:26px;height:26px;border-radius:50%;background:#E8651A;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;">2</div>
+        <p style="font-size:12px;color:#C8DCC0;line-height:1.6;margin:3px 0 0;"><strong style="color:#F5F0E0;">Escolha a data de entrega</strong> — este fim de semana ou o próximo. Pedidos aceitos até quinta-feira.</p>
+      </div>
+      <div style="display:flex;gap:12px;align-items:flex-start;">
+        <div style="width:26px;height:26px;border-radius:50%;background:#E8651A;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;">3</div>
+        <p style="font-size:12px;color:#C8DCC0;line-height:1.6;margin:3px 0 0;"><strong style="color:#F5F0E0;">Preencha seus dados</strong> e escolha como prefere pagar.</p>
+      </div>
+      <div style="display:flex;gap:12px;align-items:flex-start;">
+        <div style="width:26px;height:26px;border-radius:50%;background:#E8651A;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;">4</div>
+        <p style="font-size:12px;color:#C8DCC0;line-height:1.6;margin:3px 0 0;"><strong style="color:#F5F0E0;">Clique em confirmar</strong> — o WhatsApp abre com seu pedido já montado. É só apertar Enviar e aguardar a confirmação da Nat!</p>
+      </div>
+    </div>
+
+    <div style="background:rgba(245,166,35,0.15);border-left:3px solid #F5A623;border-radius:0 8px 8px 0;padding:12px 14px;">
+      <p style="font-size:12px;color:#F5A623;font-weight:700;margin:0 0 3px;">Não é legal? Fácil e prático!</p>
+      <p style="font-size:11px;color:#C8DCC0;line-height:1.6;margin:0;">Você seleciona, confirma e a Nat cuida do resto. Sem cadastro, sem senha, sem complicação. 🧡</p>
+    </div>
+
+  </div>
+
+  <div class="form-wrap" id="form-wrap">
+
+    <!-- ① CARDÁPIO POR SEMANA -->
+    <div class="section">
+      <div class="section-title">Escolha seus pratos</div>
+      <div class="section-sub">Selecione os itens e a quantidade desejada. Cardápio atualizado a cada 15 dias.</div>
+
+      <div class="taxa-entrega">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="flex-shrink:0"><path d="M1 3h15v13H1zM16 8h4l3 3v5h-7V8z" stroke="#C4622A" stroke-width="1.5" stroke-linejoin="round"/><circle cx="5.5" cy="18.5" r="1.5" stroke="#C4622A" stroke-width="1.5"/><circle cx="18.5" cy="18.5" r="1.5" stroke="#C4622A" stroke-width="1.5"/></svg>
+        <span><strong>Taxa de entrega:</strong> R$ 10,00 a R$ 15,00 conforme sua região — informada pela Nat na confirmação do pedido.</span>
+      </div>
+      <div class="minimo-aviso">
+        Pedido mínimo: <strong>R$ 60,00</strong>
+      </div>
+
+
+
+      <!-- Legenda -->
+      <div class="legenda">
+        <div class="legenda-item"><span class="badge-linha badge-premium">Premium</span></div>
+        <div class="legenda-item"><span class="badge-linha badge-dia">Dia a dia</span></div>
+        <div class="legenda-item"><span class="badge-linha badge-intl">Internacional</span></div>
+        <div class="legenda-item"><span class="badge-linha badge-petisco">Petisco</span></div>
+        <div class="legenda-item"><span class="badge-linha badge-saude">Saúde</span></div>
+        <div class="legenda-item"><span class="badge-linha badge-caldos">Caldos</span></div>
+      </div>
+
+      <!-- Painéis de cardápio por semana -->
+      <div id="cardapio-paineis"></div>
+    </div>
+
+    <!-- ② AGENDAMENTO -->
+    <div class="section">
+      <div class="section-title">Agendar entrega</div>
+      <div class="section-sub">Escolha a data de entrega. Pedidos abertos até quinta-feira · Sexta: só tarde · Sábado: manhã ou tarde · Domingo: só manhã.</div>
+
+      <div id="semanas-grid"></div>
+
+      <div id="turnos-wrap" style="display:none">
+        <div class="cat-label" style="margin-top:0; margin-bottom:10px;">Turno de entrega</div>
+        <div class="turnos-grid" id="turnos-grid">
+          <div class="turno-card" id="turno-manha" data-turno="manhã (8h–12h)" onclick="selectTurno(this)">
+            <div class="turno-hora">8h – 12h</div>
+            <div class="turno-desc" id="turno-manha-desc">Manhã · Sábado</div>
+          </div>
+          <div class="turno-card" id="turno-tarde" data-turno="tarde (13h–18h)" onclick="selectTurno(this)">
+            <div class="turno-hora">13h – 18h</div>
+            <div class="turno-desc" id="turno-tarde-desc">Tarde · Sábado</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ③ DADOS PESSOAIS -->
+    <div class="section">
+      <div class="section-title">Seus dados</div>
+      <div class="section-sub">Para confirmar o pedido e organizar a entrega.</div>
+      <div class="form-grid">
+        <div class="field form-full" id="f-nome">
+          <label>Nome completo</label>
+          <input type="text" id="inp-nome" placeholder="Como quer ser chamada">
+          <div class="erro-msg">Por favor, informe seu nome.</div>
+        </div>
+        <div class="field" id="f-whatsapp">
+          <label>WhatsApp</label>
+          <input type="tel" id="inp-whatsapp" placeholder="(21) 99999-9999">
+          <div class="erro-msg">Informe um número válido.</div>
+        </div>
+        <div class="field" id="f-bairro">
+          <label>Bairro</label>
+          <select id="inp-bairro" onchange="validaBairro()">
+            <option value="">Selecione seu bairro...</option>
+            <optgroup label="── Rio Comprido e vizinhos imediatos">
+              <option>Rio Comprido</option>
+              <option>Estácio</option>
+              <option>Catumbi</option>
+              <option>Cidade Nova</option>
+              <option>Mangueira</option>
+              <option>Praça da Bandeira</option>
+            </optgroup>
+            <optgroup label="── Centro e arredores">
+              <option>Centro</option>
+              <option>Lapa</option>
+              <option>Santa Teresa</option>
+              <option>Glória</option>
+              <option>Saúde</option>
+              <option>Gamboa</option>
+              <option>Santo Cristo</option>
+              <option>Caju</option>
+            </optgroup>
+            <optgroup label="── Grande Tijuca">
+              <option>Tijuca</option>
+              <option>Andaraí</option>
+              <option>Vila Isabel</option>
+              <option>Maracanã</option>
+              <option>Grajaú</option>
+            </optgroup>
+            <optgroup label="── Zona Norte próxima">
+              <option>São Cristóvão</option>
+              <option>Engenho Novo</option>
+              <option>São Francisco Xavier</option>
+              <option>Riachuelo</option>
+              <option>Sampaio</option>
+              <option>Rocha</option>
+              <option>Encantado</option>
+              <option>Méier</option>
+              <option>Cachambi</option>
+              <option>Água Santa</option>
+              <option>Todos os Santos</option>
+              <option>Higienópolis</option>
+            </optgroup>
+            <optgroup label="── Zona Sul próxima">
+              <option>Catete</option>
+              <option>Flamengo</option>
+              <option>Laranjeiras</option>
+              <option>Cosme Velho</option>
+              <option>Botafogo</option>
+              <option>Humaitá</option>
+              <option>Urca</option>
+            </optgroup>
+            <optgroup label="── Fora da área de entrega">
+              <option value="fora">Meu bairro não está na lista</option>
+            </optgroup>
+          </select>
+          <div class="bairro-fora" id="bairro-fora-msg">
+            Infelizmente ainda não entregamos nessa região ainda.
+            Nossa área de entrega cobre até 10 km a partir do Rio Comprido.
+            Em breve esperamos ampliar!<br>
+            <a id="wpp-fora-link" href="#" target="_blank" class="bairro-fora-wpp">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.149-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.554 4.118 1.526 5.849L0 24l6.324-1.508A11.955 11.955 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.003-1.368l-.36-.214-3.713.885.916-3.617-.235-.372A9.818 9.818 0 012.182 12C2.182 6.57 6.57 2.182 12 2.182S21.818 6.57 21.818 12 17.43 21.818 12 21.818z"/></svg>
+              Falar no WhatsApp
+            </a>
+          </div>
+          <div class="erro-msg">Selecione seu bairro.</div>
+        </div>
+        <div class="field form-full" id="f-endereco">
+          <label>Endereço completo</label>
+          <input type="text" id="inp-endereco" placeholder="Rua, número, complemento">
+          <div class="erro-msg">Informe o endereço de entrega.</div>
+        </div>
+        <div class="field form-full">
+          <label>Observações (opcional)</label>
+          <textarea id="inp-obs" placeholder="Alergias, ponto de referência, instruções especiais..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- ④ PAGAMENTO -->
+    <div class="section">
+      <div class="section-title">Forma de pagamento</div>
+      <div class="section-sub">Escolha como prefere pagar. Pagamento antecipado garante seu lugar na fila de produção.</div>
+      <div class="pagamento-opts">
+        <div class="pag-card" data-pag="Pix" data-tipo="antecipado" onclick="selectPag(this)">
+          <div class="pag-nome">Pix</div>
+          <div class="pag-desc">Chave enviada por WhatsApp após confirmação</div>
+        </div>
+        <div class="pag-card" data-pag="Transferência bancária" data-tipo="antecipado" onclick="selectPag(this)">
+          <div class="pag-nome">Transferência</div>
+          <div class="pag-desc">Dados enviados por WhatsApp após confirmação</div>
+        </div>
+        <div class="pag-nome">Cartão online</div>
+          <div class="pag-desc"></div>
+        </div>
+        <div class="pag-card" data-pag="Cartão na entrega (maquininha)" data-tipo="entrega" onclick="selectPag(this)">
+          <div class="pag-nome">Cartão na entrega</div>
+          <div class="pag-desc">Débito ou crédito na maquininha no momento da entrega</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RESUMO -->
+    <div class="resumo" id="resumo">
+      <div class="resumo-title">Resumo do pedido</div>
+      <div id="resumo-itens"></div>
+    </div>
+
+    <button class="btn-enviar" id="btn-enviar" onclick="enviarPedido()">Confirmar pedido</button>
+
+  </div><!-- /form-wrap -->
+
+  <!-- SUCESSO -->
+  <div class="sucesso" id="sucesso">
+    <div class="sucesso-icon">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+        <path d="M5 12l5 5L19 7" stroke="#1A5C38" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <h2>Quase lá!</h2>
+    <p id="sucesso-msg"></p>
+    <div class="aviso-wpp">
+      <strong>⚠️ Importante — seu pedido ainda não foi confirmado!</strong>
+      Clique no botão abaixo para abrir o WhatsApp. A mensagem com seu pedido já estará pronta — é só apertar <strong>Enviar</strong> para confirmar.
+    </div>
+    <a id="wpp-link" href="#" class="wpp-btn" target="_blank">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.149-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.554 4.118 1.526 5.849L0 24l6.324-1.508A11.955 11.955 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.003-1.368l-.36-.214-3.713.885.916-3.617-.235-.372A9.818 9.818 0 012.182 12C2.182 6.57 6.57 2.182 12 2.182S21.818 6.57 21.818 12 17.43 21.818 12 21.818z"/></svg>
+      Enviar pedido pelo WhatsApp
+    </a>
+    <p style="font-size:11px;color:var(--texto-muted);margin-top:12px;">Após enviar, aguarde a confirmação da Cozinha Geminiana.</p>
+  </div>
+
+</div><!-- /container -->
+
+<script>
+// ─────────────────────────────────────────────
+// CONFIGURAÇÃO — edite aqui
+// ─────────────────────────────────────────────
+const WHATSAPP_NUM = "5521996445384"; // ← SUBSTITUA pelo seu número com DDI
+
+// ─────────────────────────────────────────────
+// CARDÁPIOS — 3 SEMANAS ROTATIVAS
+// Semana ativa: altere semanaAtiva para '1', '2' ou '3'
+// ─────────────────────────────────────────────
+const semanaAtiva = '1'; // ← ALTERE AQUI para mudar o cardápio
+
+const CARDAPIOS = {
+    '1': {
+    label: "Cardápio 1",
+    descricao: "Entrega sexta-feira · Pedidos até quarta-feira",
+    grupos: [
+      {
+        cat: "Prato Feito — marmita completa 🍽️",
+        info: "Prato principal + arroz + feijão. Tudo no mesmo pote, feito com carinho.",
+        pratos: [
+          { nome: "Frango mineiro",         linha: "dia", preco: 27, desc: "Sobrecoxa em cubos com quiabo ao molho caseiro, acompanha arroz integral e feijão carioquinha", qtd: "560g" },
+          { nome: "Carne de Panela da Nat", linha: "dia", preco: 30, desc: "Desmanchando, com aipim macio e gosto de comida feita sem pressa, acompanha arroz e feijão", qtd: "560g" },
+        ]
+      },
+      {
+        cat: "Pratos principais 🥘",
+        pratos: [
+          { nome: "Strogonoff de Frango", linha: "dia",     preco: 42, desc: "Sobrecoxa de frango com shitake fresco e creme de leite. Reaquecer em fogo baixo mexendo sempre", qtd: "400g" },
+          { nome: "Feijão porcudo",       linha: "dia",     preco: 36, desc: "Feijão vermelho com costela suína, bacon defumado e linguiça calabresa", qtd: "450g" },
+          { nome: "Chilli de Inverno",    linha: "intl",    preco: 33, desc: "Encorpado, levemente picante e feito pra aquecer por dentro", qtd: "400g" },
+          { nome: "Fradinho carioca",     linha: "petisco", preco: 26, desc: "Feijão fradinho com carne seca, banana da terra, bacon e queijo coalho", qtd: "400g" },
+          { nome: "Caldo verde",          linha: "caldos",  preco: 20, desc: "Cremoso, aromático e feito pra desacelerar o dia", qtd: "350ml" },
+        ]
+      },
+      {
+        cat: "Petiscos & Aperitivos 🥢",
+        pratos: [
+          { nome: "Caponata da Casa", linha: "petisco", preco: 25, desc: "Berinjela macia, agridoce, picante na medida e cheia de personalidade", qtd: "200g" },
+          { nome: "Homus",            linha: "petisco", preco: 18, desc: "Grão de bico cremoso com tahine, limão e azeite. Artesanal, sem conservante", qtd: "300g" },
+        ]
+      },
+      {
+        cat: "Acompanhamentos 🫘",
+        pratos: [
+          { nome: "Feijão vermelho da casa", linha: "dia", preco: 16, desc: "Feijão vermelho temperado, simples e gostoso", qtd: "250g" },
+        ]
+      },
+      {
+        cat: "Preparos Coringa 🧑‍🍳",
+        info: "Versátil para a semana toda — use em lanches, massas, arroz e muito mais!",
+        pratos: [
+          { nome: "Frango desfiado suculento", linha: "dia", preco: 24, desc: "Simples, bem temperado e versátil", qtd: "300g" },
+        ]
+      }
+    ]
+  },
+
+  '2': {
+    label: "Cardápio 2",
+    descricao: "Feijões autorais + Frutos do mar + Internacional",
+    grupos: [
+      {
+        cat: "Prato Feito — o famoso PF 🍽️",
+        info: "Porção individual completa com prato principal + acompanhamentos. Simples, gostoso e prontinho!",
+        pratos: [
+          { nome: "Feijoada com arroz e couve",               linha: "dia", preco: 26, desc: "Feijoada completa com arroz e couve refogada — 370g" },
+          { nome: "Costela de porco com baião de 2",          linha: "dia", preco: 28, desc: "Costela suculenta com baião de dois cremoso — 300g" },
+        ]
+      },
+      {
+        cat: "Pratos principais",
+        pratos: [
+          { nome: "Bobó de camarão",                          linha: "premium", preco: 55, desc: "Camarões frescos, azeite de dendê e purê de aipim — 450g" },
+          { nome: "Empadão de camarão",                       linha: "premium", preco: 65, desc: "Empadão recheado com camarão cremoso — 1kg" },
+          { nome: "Camarão com curry vermelho",               linha: "intl",    preco: 48, desc: "Camarões ao curry vermelho tailandês com leite de coco — 400g" },
+          { nome: "Escondidinho de carne moída",              linha: "dia",     preco: 32, desc: "Purê de mandioca gratinado sobre carne moída temperada — 400g" },
+          { nome: "Fricassê de frango",                       linha: "dia",     preco: 34, desc: "Frango cremoso ao molho branco com catupiry e milho — 400g" },
+          { nome: "Frango ao curry",                          linha: "intl",    preco: 36, desc: "Frango, leite de coco, curry e especiarias — 400g" },
+          { nome: "Frango ao molho de gorgonzola",            linha: "dia",     preco: 36, desc: "Peito de frango com molho cremoso de queijo gorgonzola — 400g" },
+          { nome: "Fradinho carioca",                         linha: "dia",     preco: 34, desc: "Feijão fradinho com banana da terra, coentro, bacon e queijo coalho — 400g" },
+          { nome: "Feijão peitudo",                           linha: "dia",     preco: 36, desc: "Feijão manteiga com peito bovino e linguiça paio — 450g" },
+          { nome: "Costela de porco ao molho barbecue",       linha: "dia",     preco: 48, desc: "Costela macia ao molho barbecue defumado — 400g" },
+        ]
+      },
+      {
+        cat: "Petiscos & Aperitivos 🥢",
+        pratos: [
+          { nome: "Polvo com bacon e gremolata",              linha: "premium", preco: 60, desc: "Polvo suculento e macio, bacon crocante e gremolata de salsa — 300g" },
+          { nome: "Gourjon de peixe",                         linha: "dia",     preco: 26, desc: "Tiras de peixe empanadas artesanalmente, crocantes por fora" },
+        ]
+      },
+      {
+        cat: "Acompanhamentos",
+        pratos: [
+          { nome: "Couscous marroquinho com frango e legumes", linha: "premium", preco: 22, desc: "Couscous, frango desfiado, vegetais salteados e ervas — 250g" },
+          { nome: "Baião de 2",                               linha: "dia",     preco: 18, desc: "Arroz com feijão de corda, queijo coalho e carne seca — 400g" },
+          { nome: "Mix Low Carb",                             linha: "saude",   preco: 16, desc: "Couve-flor, brócolis, repolho e abobrinha salteados" },
+        ]
+      },
+      {
+        cat: "Caldos",
+        pratos: [
+          { nome: "Sopa de ervilha",                          linha: "dia",     preco: 18, desc: "Cremosa, levemente defumada, com croutons — 350ml" },
+          { nome: "Vichyssoise",                              linha: "caldos",  preco: 20, desc: "Sopa fria clássica de alho-poró e batata — 350ml" },
+        ]
+      },
+      {
+        cat: "Preparos Coringa 🧑‍🍳",
+        info: "Ingredientes versáteis para facilitar sua rotina. Use em lanches, massas, arroz, tapioca e muito mais!",
+        pratos: [
+          { nome: "Brunoise de legumes",                      linha: "saude",   preco: 16, desc: "Mix de legumes cortados em brunoise, salteados e temperados — 200g · rende 4 porções" },
+          { nome: "Carne desfiada",                           linha: "dia",     preco: 22, desc: "Carne bovina cozida e desfiada no tempero caseiro — 200g · rende 4 porções" },
+        ]
+      }
+    ]
+  },
+  '3': {
+    label: "Cardápio 3",
+    descricao: "Oriental & Contemporâneo",
+    grupos: [
+      {
+        cat: "Prato Feito — o famoso PF 🍽️",
+        info: "Porção individual completa com prato principal + acompanhamentos. Simples, gostoso e prontinho!",
+        pratos: [
+          { nome: "Panqueca de carne ao sugo",                  linha: "dia", preco: 22, desc: "Panquequinha verde recheada com carne moída, acompanha arroz — 370g" },
+          { nome: "Carne de panela com purê de banana e farofa", linha: "dia", preco: 24, desc: "Carne macia, purê de banana da terra e farofa crocante" },
+        ]
+      },
+      {
+        cat: "Pratos principais",
+        pratos: [
+          { nome: "Boeuf Bourguignon",                          linha: "intl",    preco: 52, desc: "Clássico francês: carne bovina braseada ao vinho tinto com legumes" },
+          { nome: "Sobrecoxa ao molho oriental",                linha: "intl",    preco: 38, desc: "Sobrecoxa marinada em shoyu, gengibre e mel — 400g" },
+          { nome: "Frango xadrez",                              linha: "intl",    preco: 36, desc: "Frango salteado ao molho agridoce com amendoim e pimentão — 400g" },
+          { nome: "Barriga de porco caramelizada",              linha: "intl",    preco: 46, desc: "Barriga de porco com crosta caramelizada ao estilo asiático — 400g" },
+        ]
+      },
+      {
+        cat: "Petiscos & Aperitivos 🥢",
+        pratos: [
+          { nome: "Gyoza de porco",                             linha: "intl",    preco: 28, desc: "Pastel japonês recheado com porco e vegetais, grelhado" },
+          { nome: "Rolinho primavera",                          linha: "intl",    preco: 24, desc: "Massa crocante recheada com legumes e carne, ao estilo asiático" },
+          { nome: "Tomate confit",                              linha: "premium", preco: 20, desc: "Tomates confitados lentamente no azeite com ervas aromáticas" },
+        ]
+      },
+      {
+        cat: "Caldos & Lanches",
+        pratos: [
+          { nome: "Creme de abóbora com carne seca",            linha: "dia",     preco: 22, desc: "Creme aveludado de abóbora com carne seca desfiada — 350ml" },
+          { nome: "Tortinha de frango",                         linha: "dia",     preco: 18, desc: "Tortinha recheada com frango cremoso e requeijão" },
+        ]
+      }
+    ]
+  }
+};
+
+// ─────────────────────────────────────────────
+// Descobre a semana atual (par → B, ímpar → A)
+// ─────────────────────────────────────────────
+function semanaDoAno(data) {
+  const inicio = new Date(data.getFullYear(), 0, 1);
+  return Math.ceil(((data - inicio) / 86400000 + inicio.getDay() + 1) / 7);
+}
+const hoje = new Date();
+// semanaAtiva definida no topo do script
+
+// ─────────────────────────────────────────────
+// Aviso no topo
+// ─────────────────────────────────────────────
+document.getElementById('aviso-semana').textContent =
+  `${CARDAPIOS[semanaAtiva].label} · ${CARDAPIOS[semanaAtiva].descricao} · Pedidos até quinta-feira`;
+
+// ─────────────────────────────────────────────
+// Monta tabs e painéis de cardápio
+// ─────────────────────────────────────────────
+const paineisEl = document.getElementById('cardapio-paineis');
+
+// Renderiza o cardápio da semana ativa
+const cd = CARDAPIOS[semanaAtiva];
+const painel = document.createElement('div');
+painel.className = 'cardapio-painel';
+painel.id = 'painel-A';
+
+let html = '';
+cd.grupos.forEach(grupo => {
+  html += `<div class="cat-label">${grupo.cat}</div>`;
+  // Info padrão por categoria
+  let infoTexto = grupo.info || null;
+  if (!infoTexto) {
+    if (grupo.cat === 'Pratos principais') infoTexto = '🍽️ Porção para até 2 pessoas. O acompanhamento (arroz, salada, massa) fica por conta do cliente.';
+    else if (grupo.cat.includes('PRATO FEITO') || grupo.cat.includes('Prato Feito')) infoTexto = '🍽️ Porção individual completa com prato principal + acompanhamentos. Simples, gostoso e prontinho!';
+    else if (grupo.cat === 'Acompanhamentos') infoTexto = '🥗 Complementos perfeitos para acompanhar seu prato principal. Já vêm prontos para servir!';
+    else if (grupo.cat === 'Aperitivos & Petiscos') infoTexto = '🥢 Entradas, petiscos e aperitivos. Ótimos para compartilhar ou abrir o apetite!';
+    else if (grupo.cat.includes('Caldos')) infoTexto = '🍲 Quentinhos e reconfortantes. Ótimos para os dias frios ou como entrada.';
+    else if (grupo.cat.includes('Preparos Coringa')) infoTexto = '🧑‍🍳 Ingredientes versáteis para facilitar sua rotina. Use em lanches, massas, arroz, tapioca e muito mais!';
+  }
+  if (infoTexto) {
+    html += '<div style="background:rgba(232,101,26,0.08);border-left:3px solid var(--laranja);border-radius:0 8px 8px 0;padding:9px 13px;margin-bottom:10px;font-size:11px;color:#5A2A00;line-height:1.55;">' + infoTexto + '</div>';
+  }
+  grupo.pratos.forEach(p => {
+    html += `
+    <div class="prato-item" data-nome="${p.nome}" data-preco="${p.preco}" onclick="togglePrato(this)">
+      <div class="prato-check"><svg width="10" height="8" viewBox="0 0 10 8"><path d="M1 4l3 3 5-5" stroke="#fff" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="prato-info">
+        <div class="prato-nome">${p.nome}</div>
+        <div class="prato-desc">${p.desc}</div>
+        <div class="prato-qtd">${p.qtd || ''}</div>
+      </div>
+      <span class="badge-linha badge-${p.linha}">${badgeLabel(p.linha)}</span>
+      <div class="prato-preco">R$ ${p.preco.toFixed(2).replace('.',',')}</div>
+      <div class="prato-qty">
+        <button class="qty-btn" onclick="changeQty(event,this,-1)">−</button>
+        <span class="qty-num">1</span>
+        <button class="qty-btn" onclick="changeQty(event,this,1)">+</button>
+      </div>
+    </div>`;
+  });
+});
+
+painel.innerHTML = html;
+paineisEl.appendChild(painel);
+
+function badgeLabel(linha) {
+  const map = { premium:'Premium', dia:'Dia a dia', intl:'Internacional', petisco:'Petisco', saude:'Saúde', caldos:'Caldos' };
+  return map[linha] || linha;
+}
+
+
+
+// ─────────────────────────────────────────────
+// Gera datas de entrega por cardápio
+// Semana A = datas desta semana | Semana B = +7 dias
+// Sábado: pedidos até quarta (-3) | Domingo: pedidos até quinta (-3)
+// ─────────────────────────────────────────────
+// ─────────────────────────────────────────────
+// Sempre mostra os próximos 2 fins de semana disponíveis
+// Prazo: até quinta-feira da semana de entrega
+// Sábado: fecha na quinta (-1 dia) | Domingo: fecha na quinta (-3 dias)
+// Independente do cardápio A ou B selecionado
+// ─────────────────────────────────────────────
+function montaGridEntrega() {
+  const gridEntrega = document.getElementById('semanas-grid');
+  gridEntrega.innerHTML = '';
+
+  const datas = [];
+  for (let i = 1; i <= 21; i++) {
+    const d = new Date(hoje);
+    d.setDate(hoje.getDate() + i);
+    const dia = d.getDay();
+    if (dia === 5 || dia === 6 || dia === 0) {
+      const prazo = new Date(d);
+      // Sexta (5): prazo até quinta (-1) | Sábado (6): prazo até quinta (-2) | Domingo (0): prazo até quinta (-4)
+      const offset = dia === 5 ? 1 : dia === 6 ? 2 : 4;
+      prazo.setDate(d.getDate() - offset);
+      const aberto = hoje <= prazo;
+      datas.push({ data: d, prazo, aberto, diaSemana: dia });
+    }
+    if (datas.length === 6) break; // 2 fins de semana = 3 datas x 2 (sex+sáb+dom)
+  }
+
+  // Agrupa por fim de semana (grupos de 3)
+  const fds = [];
+  for (let i = 0; i < datas.length; i += 3) {
+    fds.push(datas.slice(i, i + 3));
+  }
+
+  fds.forEach((par, idx) => {
+    const grupo = document.createElement('div');
+    grupo.className = 'entrega-grupo';
+    const label = idx === 0 ? 'Este fim de semana' : 'Próximo fim de semana';
+    grupo.innerHTML = `<div class="entrega-grupo-label">${label}</div><div class="semanas-grid"></div>`;
+    const grid = grupo.querySelector('.semanas-grid');
+
+    par.forEach(s => {
+      const card = document.createElement('div');
+      const nomeDia  = s.diaSemana === 5 ? 'Sexta' : s.diaSemana === 6 ? 'Sábado' : 'Domingo';
+      const dataFmt  = s.data.toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit' });
+      const prazoFmt = s.prazo.toLocaleDateString('pt-BR', { weekday:'long', day:'2-digit', month:'long' });
+      card.className = 'semana-card' + (s.aberto ? '' : ' bloqueada');
+      card.dataset.semana = nomeDia + ', ' + s.data.toLocaleDateString('pt-BR', { day:'2-digit', month:'long' });
+      card.innerHTML = `
+        <div class="semana-data">${nomeDia} ${dataFmt}</div>
+        <div class="semana-prazo">Pedidos até ${prazoFmt}</div>
+        <div class="semana-status ${s.aberto ? 'status-aberto' : 'status-fechado'}">${s.aberto ? '● Aberto' : '● Encerrado'}</div>`;
+      if (s.aberto) card.onclick = () => selectSemana(card);
+      grid.appendChild(card);
+    });
+
+    gridEntrega.appendChild(grupo);
+  });
+}
+
+// Monta grid de entrega (independente do cardápio)
+montaGridEntrega();
+
+// ─────────────────────────────────────────────
+// Interações
+// ─────────────────────────────────────────────
+let semanaSelected = null, turnoSelected = null, pagSelected = null;
+
+function selectSemana(el) {
+  document.querySelectorAll('.semana-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  semanaSelected = el.dataset.semana;
+  document.getElementById('turnos-wrap').style.display = 'block';
+  turnoSelected = null;
+  document.querySelectorAll('.turno-card').forEach(c => c.classList.remove('selected'));
+
+  const isSexta   = semanaSelected.startsWith('Sexta');
+  const isDomingo  = semanaSelected.startsWith('Domingo');
+  const turnoManha = document.getElementById('turno-manha');
+  const turnoTarde = document.getElementById('turno-tarde');
+  const descManha  = document.getElementById('turno-manha-desc');
+  const descTarde  = document.getElementById('turno-tarde-desc');
+
+  if (isSexta) {
+    // Sexta: só tarde
+    turnoManha.style.display = 'none';
+    turnoTarde.style.display = 'block';
+    descTarde.textContent = 'Tarde · Sexta';
+  } else if (isDomingo) {
+    // Domingo: só manhã
+    turnoManha.style.display = 'block';
+    turnoTarde.style.display = 'none';
+    descManha.textContent = 'Manhã · Domingo';
+  } else {
+    // Sábado: manhã e tarde
+    turnoManha.style.display = 'block';
+    turnoTarde.style.display = 'block';
+    descManha.textContent = 'Manhã · Sábado';
+    descTarde.textContent  = 'Tarde · Sábado';
+  }
+
+  atualizaResumo();
+}
+function selectTurno(el) {
+  document.querySelectorAll('.turno-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  turnoSelected = el.dataset.turno;
+  atualizaResumo();
+}
+function selectPag(el) {
+  document.querySelectorAll('.pag-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  pagSelected = el.dataset.pag;
+  atualizaResumo();
+}
+
+function togglePrato(el) {
+  if (event.target.closest('.prato-qty')) return;
+  el.classList.toggle('selected');
+  if (el.classList.contains('selected')) el.querySelector('.qty-num').textContent = '1';
+  atualizaResumo();
+}
+function changeQty(e, btn, delta) {
+  e.stopPropagation();
+  const item = btn.closest('.prato-item');
+  const num  = item.querySelector('.qty-num');
+  let q = parseInt(num.textContent) + delta;
+  if (q < 1) { item.classList.remove('selected'); q = 1; }
+  num.textContent = q;
+  atualizaResumo();
+}
+
+function getPratos() {
+  return [...document.querySelectorAll('.prato-item.selected')].map(el => ({
+    nome:  el.dataset.nome,
+    preco: parseFloat(el.dataset.preco),
+    qty:   parseInt(el.querySelector('.qty-num').textContent)
+  }));
+}
+
+function atualizaResumo() {
+  const pratos = getPratos();
+  const resumo = document.getElementById('resumo');
+  const itens  = document.getElementById('resumo-itens');
+  if (!pratos.length) { resumo.classList.remove('visible'); return; }
+  resumo.classList.add('visible');
+
+  let html = '';
+  let total = 0;
+  pratos.forEach(p => {
+    const sub = p.preco * p.qty;
+    total += sub;
+    html += `<div class="resumo-linha">
+      <span class="resumo-label">${p.nome} × ${p.qty}</span>
+      <span class="resumo-val">R$ ${sub.toFixed(2).replace('.',',')}</span>
+    </div>`;
+  });
+  if (semanaSelected) html += `<div class="resumo-linha"><span class="resumo-label">Entrega</span><span class="resumo-val">${semanaSelected}</span></div>`;
+  if (turnoSelected)  html += `<div class="resumo-linha"><span class="resumo-label">Turno</span><span class="resumo-val">${turnoSelected}</span></div>`;
+  if (pagSelected)    html += `<div class="resumo-linha"><span class="resumo-label">Pagamento</span><span class="resumo-val">${pagSelected}</span></div>`;
+  html += `<div class="resumo-linha"><span class="resumo-label">Total</span><span class="resumo-val resumo-total-val">R$ ${total.toFixed(2).replace('.',',')}</span></div>`;
+  itens.innerHTML = html;
+}
+
+function validaBairro() {
+  const sel = document.getElementById('inp-bairro');
+  const msg = document.getElementById('bairro-fora-msg');
+  const isFora = sel.value === 'fora';
+  msg.classList.toggle('visible', isFora);
+  if (isFora) {
+    const texto = encodeURIComponent('Olá! Gostaria de fazer um pedido na Cozinha Geminiana, mas meu bairro não está na lista de entrega. Vocês conseguem atender minha região?');
+    document.getElementById('wpp-fora-link').href = `https://wa.me/${WHATSAPP_NUM}?text=${texto}`;
+  }
+}
+
+function setErro(id, ativo) {
+  document.getElementById('f-' + id)?.classList.toggle('erro', ativo);
+}
+
+async function enviarPedido() {
+  const pratos  = getPratos();
+  const nome    = document.getElementById('inp-nome').value.trim();
+  const wpp     = document.getElementById('inp-whatsapp').value.trim();
+  const bairro  = document.getElementById('inp-bairro').value.trim();
+  const end     = document.getElementById('inp-endereco').value.trim();
+  const obs     = document.getElementById('inp-obs').value.trim();
+
+  let ok = true;
+  if (!nome)   { setErro('nome', true);     ok = false; } else setErro('nome', false);
+  if (!wpp)    { setErro('whatsapp', true); ok = false; } else setErro('whatsapp', false);
+  if (!bairro || bairro === 'fora') { setErro('bairro', true); ok = false; } else setErro('bairro', false);
+  if (bairro === 'fora') { alert('Seu bairro está fora da nossa área de entrega por enquanto. Em breve expandimos!'); ok = false; }
+  if (!end)    { setErro('endereco', true); ok = false; } else setErro('endereco', false);
+  if (!pratos.length)    { alert('Selecione pelo menos um prato para continuar.'); ok = false; }
+  if (!semanaSelected)   { alert('Escolha a data de entrega.'); ok = false; }
+  if (!turnoSelected)    { alert('Escolha o turno de entrega.'); ok = false; }
+  if (!pagSelected)      { alert('Escolha a forma de pagamento.'); ok = false; }
+
+  // Verifica mínimo
+  const total = pratos.reduce((s, p) => s + p.preco * p.qty, 0);
+  const qtdTotal = pratos.reduce((s, p) => s + p.qty, 0);
+  if (total < 60)    { alert(`Pedido mínimo é R$ 60,00. Seu pedido está em R$ ${total.toFixed(2).replace('.',',')}.`); ok = false; }
+
+
+  if (!ok) return;
+
+  const pratosTexto = pratos.map(p => `• ${p.nome} (${p.qty}x) — R$ ${(p.preco*p.qty).toFixed(2).replace('.',',')}`)
+                             .join('\n');
+  const totalFmt = `R$ ${total.toFixed(2).replace('.',',')}`;
+
+  const mensagem =
+    `*Novo pedido — Cozinha Geminiana*\n\n` +
+    `*Cliente:* ${nome}\n` +
+    `*WhatsApp:* ${wpp}\n` +
+    `*Endereço:* ${end}, ${bairro}\n\n` +
+    `*Pratos:*\n${pratosTexto}\n\n` +
+    `*Total: ${totalFmt}*\n\n` +
+    `*Entrega:* ${semanaSelected} — ${turnoSelected}\n` +
+    `*Pagamento:* ${pagSelected}\n` +
+    (obs ? `*Obs:* ${obs}` : '');
+
+  const encoded = encodeURIComponent(mensagem);
+  const wppHref = `https://wa.me/${WHATSAPP_NUM}?text=${encoded}`;
+
+    if (pagSelected === 'Cartão de crédito/débito online') {
+    window.open(MERCADO_PAGO_LINK, '_blank');
+    document.getElementById('wpp-link').href = wppHref;
+    document.getElementById('sucesso-msg').innerHTML =
+      `Obrigada, <strong>${nome}</strong>! Seu pedido foi enviado. ✅`;
+  } else {
+    document.getElementById('wpp-link').href = wppHref;
+    document.getElementById('sucesso-msg').innerHTML =
+      `Obrigada, <strong>${nome}</strong>! Seu pedido no valor de <strong>${totalFmt}</strong> está pronto para ser enviado.`;
+  }
+
+  // Desconta estoque no Firebase
+  // Desconta estoque sem bloquear o fluxo — se Firebase falhar, pedido segue normalmente
+  try {
+    if (window.descontaEstoque) await window.descontaEstoque(pratos);
+  } catch(e) {
+    console.warn('Estoque não atualizado:', e);
+  }
+  document.getElementById('form-wrap').style.display = 'none';
+  document.getElementById('sucesso').classList.add('visible');
+}
+</script>
+</body>
+</html>

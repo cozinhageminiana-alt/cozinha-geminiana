@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — Cozinha Geminiana</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --verde:     #1A5C38;
+    --verde-cl:  #D6EAD6;
+    --verde-med: #3B6D11;
+    --bege:      #F5F0E8;
+    --bege-cl:   #FAF7F2;
+    --vermelho:  #D93B2B;
+    --verm-cl:   #FCEBEB;
+    --amarelo:   #FFF8E1;
+    --amar-brd:  #FFD54F;
+    --cinza:     #F1EFE8;
+    --cinza-med: #D3D1C7;
+    --texto:     #2C2C2A;
+    --muted:     #888780;
+  }
+  body { font-family: 'Lato', sans-serif; background: var(--bege-cl); color: var(--texto); min-height: 100vh; }
+
+  /* LOGIN */
+  .login-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; }
+  .login-card { background: #fff; border-radius: 16px; border: 0.5px solid var(--cinza-med); padding: 40px 36px; width: 100%; max-width: 380px; text-align: center; }
+  .login-logo-cozinha { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; color: var(--vermelho); }
+  .login-logo-gem     { font-family: 'Playfair Display', serif; font-size: 17px; color: var(--texto); margin-bottom: 4px; }
+  .login-sub  { font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); margin-bottom: 28px; }
+  .login-field { text-align: left; margin-bottom: 16px; }
+  .login-field label { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 5px; }
+  .login-field input { width: 100%; padding: 10px 14px; border: 1px solid var(--cinza-med); border-radius: 8px; font-size: 14px; font-family: 'Lato', sans-serif; background: var(--bege-cl); outline: none; }
+  .login-field input:focus { border-color: var(--verde); background: #fff; }
+  .btn-login { width: 100%; padding: 13px; background: var(--verde); color: #F0E8D5; font-family: 'Playfair Display', serif; font-size: 15px; border: none; border-radius: 10px; cursor: pointer; margin-top: 4px; }
+  .btn-login:hover { background: var(--verde-med); }
+  .login-erro { font-size: 12px; color: var(--vermelho); margin-top: 10px; display: none; }
+
+  /* ADMIN */
+  .admin-wrap { display: none; max-width: 780px; margin: 0 auto; padding: 28px 20px 60px; }
+
+  header { background: var(--verde); padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; }
+  .header-logo { display: flex; flex-direction: column; }
+  .header-cozinha { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700; color: var(--vermelho); }
+  .header-gem     { font-family: 'Playfair Display', serif; font-size: 14px; color: #F0E8D5; }
+  .header-right   { display: flex; align-items: center; gap: 12px; }
+  .header-badge   { font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; background: rgba(255,255,255,0.12); color: #8FA882; padding: 4px 10px; border-radius: 20px; }
+  .btn-sair       { font-size: 11px; color: #8FA882; background: none; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; padding: 5px 12px; cursor: pointer; font-family: 'Lato', sans-serif; }
+  .btn-sair:hover { background: rgba(255,255,255,0.08); }
+
+  .section { background: #fff; border-radius: 12px; border: 0.5px solid var(--cinza-med); padding: 22px 24px; margin-bottom: 20px; }
+  .section-title { font-family: 'Playfair Display', serif; font-size: 17px; color: var(--verde); margin-bottom: 4px; }
+  .section-sub   { font-size: 12px; color: var(--muted); margin-bottom: 18px; }
+
+  /* RESUMO CARDS */
+  .resumo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+  .resumo-card { background: var(--cinza); border-radius: 10px; padding: 14px 16px; text-align: center; }
+  .resumo-num   { font-size: 26px; font-weight: 700; color: var(--verde); line-height: 1; margin-bottom: 4px; }
+  .resumo-label { font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+
+  /* BOTÃO ZERAR QUINZENA */
+  .btn-zerar { width: 100%; padding: 14px; background: var(--vermelho); color: #fff; font-family: 'Playfair Display', serif; font-size: 15px; border: none; border-radius: 10px; cursor: pointer; margin-bottom: 10px; }
+  .btn-zerar:hover { background: #B82E1F; }
+  .aviso-zerar { font-size: 11px; color: var(--muted); text-align: center; line-height: 1.6; }
+
+  /* TABELA DE ESTOQUE */
+  .estoque-item { display: flex; align-items: center; gap: 12px; padding: 11px 0; border-bottom: 0.5px solid var(--cinza); }
+  .estoque-item:last-child { border-bottom: none; }
+  .estoque-nome { flex: 1; font-size: 13px; color: var(--texto); }
+  .estoque-nome span { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; padding: 2px 7px; border-radius: 20px; margin-left: 6px; }
+  .badge-premium { background: #FAECE7; color: #712B13; }
+  .badge-dia     { background: #EAF3DE; color: #27500A; }
+  .badge-intl    { background: #E6F1FB; color: #0C447C; }
+  .badge-petisco { background: #FAEEDA; color: #633806; }
+  .badge-saude   { background: #E1F5EE; color: #085041; }
+  .badge-caldos  { background: #EDE8F5; color: #3C3489; }
+
+  .barra-wrap { flex: 1; max-width: 180px; }
+  .barra-bg   { background: var(--cinza); border-radius: 4px; height: 6px; overflow: hidden; }
+  .barra-fill { height: 6px; border-radius: 4px; background: var(--verde); transition: width .3s; }
+  .barra-fill.alerta  { background: #E8A000; }
+  .barra-fill.esgotado { background: var(--vermelho); }
+
+  .estoque-nums { font-size: 12px; color: var(--muted); min-width: 60px; text-align: right; }
+  .estoque-nums strong { color: var(--texto); }
+
+  .btn-editar { width: 28px; height: 28px; border-radius: 6px; border: 1px solid var(--cinza-med); background: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .btn-editar:hover { border-color: var(--verde); background: var(--bege-cl); }
+
+  /* MODAL EDITAR */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 100; align-items: center; justify-content: center; }
+  .modal-overlay.visible { display: flex; }
+  .modal { background: #fff; border-radius: 14px; padding: 28px 28px 24px; width: 100%; max-width: 340px; }
+  .modal-title { font-family: 'Playfair Display', serif; font-size: 16px; color: var(--verde); margin-bottom: 4px; }
+  .modal-sub   { font-size: 12px; color: var(--muted); margin-bottom: 20px; }
+  .modal-field label { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 5px; }
+  .modal-field input { width: 100%; padding: 10px 14px; border: 1px solid var(--cinza-med); border-radius: 8px; font-size: 15px; font-family: 'Lato', sans-serif; background: var(--bege-cl); outline: none; margin-bottom: 16px; }
+  .modal-field input:focus { border-color: var(--verde); background: #fff; }
+  .modal-btns { display: flex; gap: 10px; }
+  .btn-confirmar { flex: 1; padding: 11px; background: var(--verde); color: #F0E8D5; border: none; border-radius: 8px; font-size: 13px; font-family: 'Lato', sans-serif; font-weight: 700; cursor: pointer; }
+  .btn-confirmar:hover { background: var(--verde-med); }
+  .btn-cancelar  { flex: 1; padding: 11px; background: #fff; color: var(--muted); border: 1px solid var(--cinza-med); border-radius: 8px; font-size: 13px; font-family: 'Lato', sans-serif; cursor: pointer; }
+
+  /* TOAST */
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #1A1A1A; color: #fff; font-size: 13px; padding: 12px 24px; border-radius: 8px; z-index: 200; opacity: 0; transition: opacity .3s; pointer-events: none; }
+  .toast.visible { opacity: 1; }
+
+  /* LOADING */
+  .loading { text-align: center; padding: 40px; color: var(--muted); font-size: 13px; }
+
+  @media (max-width: 500px) {
+    .resumo-grid { grid-template-columns: 1fr 1fr; }
+    .barra-wrap { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-wrap" id="login-wrap">
+  <div class="login-card">
+    <div class="login-logo-cozinha">COZINHA</div>
+    <div class="login-logo-gem">Geminiana</div>
+    <div class="login-sub">Painel de administração</div>
+    <div class="login-field">
+      <label>Senha</label>
+      <input type="password" id="inp-senha" placeholder="Digite a senha" onkeydown="if(event.key==='Enter')entrar()">
+    </div>
+    <button class="btn-login" onclick="entrar()">Entrar</button>
+    <div class="login-erro" id="login-erro">Senha incorreta. Tente novamente.</div>
+  </div>
+</div>
+
+<!-- ADMIN -->
+<header id="admin-header" style="display:none">
+  <div class="header-logo">
+    <div class="header-cozinha">COZINHA</div>
+    <div class="header-gem">Geminiana</div>
+  </div>
+  <div class="header-right">
+    <span class="header-badge" id="admin-semana-badge">Painel Admin · Semana 1</span>
+    <button class="btn-sair" onclick="sair()">Sair</button>
+  </div>
+</header>
+
+<div class="admin-wrap" id="admin-wrap">
+
+  <!-- RESUMO -->
+  <div class="resumo-grid" id="resumo-cards">
+    <div class="resumo-card"><div class="resumo-num" id="res-total">—</div><div class="resumo-label">Pedidos esta quinzena</div></div>
+    <div class="resumo-card"><div class="resumo-num" id="res-esgotados">—</div><div class="resumo-label">Pratos esgotados</div></div>
+    <div class="resumo-card"><div class="resumo-num" id="res-disponivel">—</div><div class="resumo-label">Pratos disponíveis</div></div>
+  </div>
+
+  <!-- ZERAR QUINZENA -->
+  <div class="section">
+    <div class="section-title">Nova quinzena</div>
+    <div class="section-sub">Use este botão no início de cada quinzena para zerar o estoque e começar uma nova rodada de pedidos.</div>
+    <button class="btn-zerar" onclick="confirmaZerar()">Zerar estoque — iniciar nova quinzena</button>
+    <p class="aviso-zerar">Esta ação zerará o contador de vendas de todos os pratos.<br>Não é possível desfazer.</p>
+  </div>
+
+  <!-- ESTOQUE POR PRATO -->
+  <div class="section">
+    <div class="section-title">Estoque por prato</div>
+    <div class="section-sub">Acompanhe em tempo real. Clique no lápis para ajustar manualmente qualquer prato.</div>
+    <div id="lista-estoque"><div class="loading">Carregando estoque...</div></div>
+  </div>
+
+</div>
+
+<!-- MODAL EDITAR -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <div class="modal-title" id="modal-titulo">Ajustar estoque</div>
+    <div class="modal-sub" id="modal-sub">Informe quantas unidades já foram vendidas deste prato.</div>
+    <div class="modal-field">
+      <label>Unidades vendidas (de 10)</label>
+      <input type="number" id="modal-vendido" min="0" max="10" placeholder="0">
+    </div>
+    <div class="modal-btns">
+      <button class="btn-cancelar" onclick="fechaModal()">Cancelar</button>
+      <button class="btn-confirmar" onclick="salvaEdicao()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot, writeBatch, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBg0Nw5UqGKVtMq6Q34_RUaoZzhawy0OIs",
+  authDomain: "cozinhageminiana-1dee7.firebaseapp.com",
+  projectId: "cozinhageminiana-1dee7",
+  storageBucket: "cozinhageminiana-1dee7.firebasestorage.app",
+  messagingSenderId: "181751393390",
+  appId: "1:181751393390:web:e9ccf53a4657a12649ca7f"
+};
+
+const app = initializeApp(firebaseConfig);
+const db  = getFirestore(app, 'cozinha-geminiana');
+const COL = 'estoque';
+const LIMITES = {
+    'frango-mineiro': 10,
+    'carne-de-panela-da-nat': 9,
+    'strogonoff-de-frango': 9,
+    'feijo-porcudo': 9,
+    'chilli-de-inverno': 9,
+    'caldo-verde': 10,
+    'caponata-da-casa': 10,
+    'fradinho-carioca': 10,
+    'homus': 8,
+    'feijo-vermelho-da-casa': 3,
+    'feijo-carioquinha-com-bacon': 10,
+    'frango-desfiado-suculento': 5,
+  };
+  function getLimite(pratoId) { return LIMITES[pratoId] ?? 10; }
+
+// ── Todos os pratos (A + B, únicos) ──
+// ── Pratos agrupados por semana ──
+const PRATOS_POR_SEMANA = {
+  '1': [
+        { nome: "Frango mineiro",                linha: "dia"     },
+        { nome: "Carne de Panela da Nat",        linha: "dia"     },
+        { nome: "Strogonoff de Frango",          linha: "dia"     },
+        { nome: "Feijão porcudo",                linha: "dia"     },
+        { nome: "Chilli de Inverno",             linha: "intl"    },
+        { nome: "Caldo verde",                   linha: "caldos"  },
+        { nome: "Caponata da Casa",              linha: "petisco" },
+        { nome: "Fradinho carioca",              linha: "petisco" },
+        { nome: "Homus",                         linha: "petisco" },
+        { nome: "Feijão vermelho da casa",       linha: "dia"     },
+        { nome: "Feijão carioquinha com bacon",  linha: "dia"     },
+        { nome: "Frango desfiado suculento",     linha: "dia"     },
+      ],
+      '2': '2': '2': [
+    { nome: "Feijoada com arroz e couve",                              linha: "dia"     },
+    { nome: "Costela de porco com baião de 2",                         linha: "dia"     },
+    { nome: "Bobó de camarão",                                         linha: "premium" },
+    { nome: "Empadão de camarão",                                      linha: "premium" },
+    { nome: "Camarão com curry vermelho",                               linha: "intl"    },
+    { nome: "Escondidinho de carne moída",                             linha: "dia"     },
+    { nome: "Fricassê de frango",                                      linha: "dia"     },
+    { nome: "Frango ao curry",                                         linha: "intl"    },
+    { nome: "Frango ao molho de gorgonzola",                           linha: "dia"     },
+    { nome: "Fradinho carioca",                                        linha: "dia"     },
+    { nome: "Feijão peitudo",                                          linha: "dia"     },
+    { nome: "Costela de porco ao molho barbecue",                      linha: "dia"     },
+    { nome: "Polvo com bacon e gremolata",                             linha: "premium" },
+    { nome: "Gourjon de peixe",                                        linha: "dia"     },
+    { nome: "Couscous marroquinho com frango e legumes",               linha: "premium" },
+    { nome: "Baião de 2",                                              linha: "dia"     },
+    { nome: "Mix Low Carb",                                            linha: "saude"   },
+    { nome: "Sopa de ervilha",                                         linha: "dia"     },
+    { nome: "Quiche lorraine",                                         linha: "petisco" },
+    { nome: "Vichyssoise",                                             linha: "caldos"  },
+    { nome: "Brunoise de legumes",                                     linha: "saude"   },
+    { nome: "Carne desfiada",                                          linha: "dia"     },
+  ],
+  '3': [
+    { nome: "Panqueca de carne ao sugo",                               linha: "dia"     },
+    { nome: "Carne de panela com purê de banana e farofa",             linha: "dia"     },
+    { nome: "Boeuf Bourguignon",                                       linha: "intl"    },
+    { nome: "Sobrecoxa ao molho oriental",                             linha: "intl"    },
+    { nome: "Frango xadrez",                                           linha: "intl"    },
+    { nome: "Barriga de porco caramelizada",                           linha: "intl"    },
+    { nome: "Gyoza de porco",                                          linha: "intl"    },
+    { nome: "Rolinho primavera",                                       linha: "intl"    },
+    { nome: "Tomate confit",                                           linha: "premium" },
+    { nome: "Creme de abóbora com carne seca",                        linha: "dia"     },
+    { nome: "Tortinha de frango",                                      linha: "dia"     },
+  ],
+};
+
+// Semana ativa — mantenha igual à do site
+const semanaAdmin = '1'; // ← ALTERE para '1', '2' ou '3'
+const PRATOS = PRATOS_POR_SEMANA[semanaAdmin];
+
+function pratoId(nome) {
+  return nome.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '').replace(/-+/g, '-');
+}
+
+// ── LOGIN ──
+const SENHA = "geminiana2025"; // ← Troque pela sua senha
+
+window.entrar = function() {
+  const s = document.getElementById('inp-senha').value;
+  if (s === SENHA) {
+    document.getElementById('login-wrap').style.display = 'none';
+    document.getElementById('admin-header').style.display = 'flex';
+    document.getElementById('admin-wrap').style.display = 'block';
+    iniciaAdmin();
+  } else {
+    document.getElementById('login-erro').style.display = 'block';
+  }
+};
+
+window.sair = function() {
+  document.getElementById('login-wrap').style.display = 'flex';
+  document.getElementById('admin-header').style.display = 'none';
+  document.getElementById('admin-wrap').style.display = 'none';
+  document.getElementById('inp-senha').value = '';
+};
+
+// ── INICIA ADMIN ──
+async function iniciaAdmin() {
+  // Garante que todos os pratos existem no Firestore
+  for (const p of PRATOS) {
+    const ref = doc(db, COL, pratoId(p.nome));
+    const snap = await getDoc(ref);
+    if (!snap.exists()) await setDoc(ref, { vendido: 0 });
+  }
+  monitoraLista();
+}
+
+// ── MONITORA EM TEMPO REAL ──
+function monitoraLista() {
+  const lista = document.getElementById('lista-estoque');
+  lista.innerHTML = '';
+
+  PRATOS.forEach(p => {
+    const id  = pratoId(p.nome);
+    const ref = doc(db, COL, id);
+
+    const row = document.createElement('div');
+    row.className = 'estoque-item';
+    row.id = 'row-' + id;
+    lista.appendChild(row);
+
+    onSnapshot(ref, snap => {
+      const vendido   = snap.exists() ? snap.data().vendido : 0;
+      const disponivel = getLimite(id) - vendido;
+      const pct        = Math.min((vendido / getLimite(id)) * 100, 100);
+      const classBarra = disponivel <= 0 ? 'esgotado' : disponivel <= 3 ? 'alerta' : '';
+      const statusTxt  = disponivel <= 0 ? '🔴 Esgotado' : disponivel <= 3 ? `⚠️ ${disponivel} restantes` : `✅ ${disponivel} disponíveis`;
+
+      row.innerHTML = `
+        <div class="estoque-nome">
+          ${p.nome}
+          <span class="badge-${p.linha}">${badgeLabel(p.linha)}</span>
+        </div>
+        <div class="barra-wrap">
+          <div class="barra-bg"><div class="barra-fill ${classBarra}" style="width:${pct}%"></div></div>
+        </div>
+        <div class="estoque-nums"><strong>${vendido}</strong>/${getLimite(id)} vendidos<br><span style="font-size:10px">${statusTxt}</span></div>
+        <button class="btn-editar" onclick="abreModal('${id}','${p.nome.replace(/'/g,"\\'")}',${vendido})" title="Editar">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M1 9.5L3.5 12l8-8-2.5-2.5-8 8z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>`;
+
+      atualizaResumoCards();
+    });
+  });
+}
+
+function badgeLabel(l) {
+  return { premium:'Premium', dia:'Dia a dia', intl:'Internacional', petisco:'Petisco', saude:'Saúde', caldos:'Caldos' }[l] || l;
+}
+
+function atualizaResumoCards() {
+  const rows = document.querySelectorAll('.estoque-item');
+  let totalVendidos = 0, esgotados = 0, disponiveis = 0;
+  rows.forEach(r => {
+    const txt = r.querySelector('.estoque-nums')?.textContent || '';
+    const m = txt.match(/(\d+)\/\d+ vendidos/);
+    if (m) {
+      const v = parseInt(m[1]);
+      totalVendidos += v;
+      const slug = r.id.replace('row-', ''); if (v >= getLimite(slug)) esgotados++;
+      else disponiveis++;
+    }
+  });
+  document.getElementById('res-total').textContent     = totalVendidos;
+  document.getElementById('res-esgotados').textContent = esgotados;
+  document.getElementById('res-disponivel').textContent = disponiveis;
+}
+
+// ── ZERAR QUINZENA ──
+window.confirmaZerar = function() {
+  if (confirm('Tem certeza? Isso zerará o estoque de TODOS os pratos e iniciará uma nova quinzena.')) {
+    zerarTodos();
+  }
+};
+
+async function zerarTodos() {
+  const batch = writeBatch(db);
+  PRATOS.forEach(p => {
+    batch.set(doc(db, COL, pratoId(p.nome)), { vendido: 0 });
+  });
+  await batch.commit();
+  mostraToast('✅ Estoque zerado! Nova quinzena iniciada.');
+}
+
+// ── MODAL EDITAR ──
+let modalPratoId = null;
+
+window.abreModal = function(id, nome, vendido) {
+  modalPratoId = id;
+  document.getElementById('modal-titulo').textContent = nome;
+  document.getElementById('modal-vendido').value = vendido;
+  document.getElementById('modal-overlay').classList.add('visible');
+  document.getElementById('modal-vendido').focus();
+};
+
+window.fechaModal = function() {
+  document.getElementById('modal-overlay').classList.remove('visible');
+  modalPratoId = null;
+};
+
+window.salvaEdicao = async function() {
+  const v = parseInt(document.getElementById('modal-vendido').value);
+  if (isNaN(v) || v < 0 || v > getLimite(modalPratoId)) {
+    alert(`Informe um número entre 0 e ${getLimite(modalPratoId)}.`);
+    return;
+  }
+  await updateDoc(doc(db, COL, modalPratoId), { vendido: v });
+  fechaModal();
+  mostraToast('✅ Estoque atualizado!');
+};
+
+// ── TOAST ──
+function mostraToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('visible');
+  setTimeout(() => t.classList.remove('visible'), 3000);
+}
+
+// Fechar modal clicando fora
+document.getElementById('modal-overlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('modal-overlay')) fechaModal();
+});
+</script>
+</body>
+</html>
