@@ -91,6 +91,7 @@
   .prato-item.selected .prato-preco { color: var(--verde); }
 
   .prato-qty { display: none; align-items: center; gap: 8px; flex-shrink: 0; }
+  .qty-btn:disabled { opacity: 0.3; cursor: not-allowed; }
   .prato-item.selected .prato-qty { display: flex; }
   .qty-btn { width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--verde); background: none; color: var(--verde); font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; line-height: 1; transition: background .1s; }
   .qty-btn:hover { background: var(--verde); color: #fff; }
@@ -970,10 +971,13 @@ function togglePrato(el) {
 }
 function changeQty(e, btn, delta) {
   e.stopPropagation();
-  const item = btn.closest('.prato-item');
-  const num  = item.querySelector('.qty-num');
+  const item  = btn.closest('.prato-item');
+  const num   = item.querySelector('.qty-num');
+  const pratoId = item.dataset.nome.toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'');
+  const limite  = getLimite(pratoId);
   let q = parseInt(num.textContent) + delta;
   if (q < 1) { item.classList.remove('selected'); q = 1; }
+  if (q > limite) { q = limite; }
   num.textContent = q;
   atualizaResumo();
 }
