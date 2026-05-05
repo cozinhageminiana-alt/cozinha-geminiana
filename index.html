@@ -204,6 +204,30 @@
   .field.erro input, .field.erro select { border-color: #E24B4A; }
   .field.erro .erro-msg { display: block; }
 
+  /* ── FRETE POR BAIRRO ── */
+  .frete-info { display: none; align-items: center; gap: 10px; margin-top: 10px;
+    border-radius: 8px; padding: 11px 14px; font-size: 12px; line-height: 1.55; }
+  .frete-info.visible { display: flex; }
+  .frete-gratis  { background: #D4EDDA; border: 1px solid #75C48F; color: #1A5C38; }
+  .frete-basico  { background: #EAF3DE; border: 1px solid #A8D47A; color: #27500A; }
+  .frete-medio   { background: var(--amarelo-cl); border: 1px solid var(--amarelo); color: #7B6000; }
+  .frete-alto    { background: var(--laranja-cl);  border: 1px solid var(--laranja); color: #7A3A10; }
+  .frete-consulta{ background: #F0EAFB; border: 1px solid #C3A5E8; color: #4A2577; }
+  .frete-valor   { font-size: 16px; font-weight: 700; white-space: nowrap; flex-shrink: 0; }
+  .frete-texto   { flex: 1; }
+
+  /* ── ESGOTADO — reforço visual ── */
+  .prato-item.esgotado { position: relative; }
+  .prato-item.esgotado::after {
+    content: '';
+    position: absolute; inset: 0; border-radius: 8px;
+    background: repeating-linear-gradient(
+      -45deg, transparent, transparent 6px,
+      rgba(200,196,190,0.18) 6px, rgba(200,196,190,0.18) 7px
+    );
+    pointer-events: none;
+  }
+
   /* ── LEGENDA DE LINHAS ── */
   .legenda { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
   .legenda-item { display: flex; align-items: center; gap: 5px; font-size: 10px; color: var(--texto-muted); }
@@ -260,7 +284,7 @@
     'caldo-verde':                 10,
     'caponata-da-casa':            10,
     'homus':                        8,
-    'feijo-vermelho-da-casa':       3,
+    'feijo-vermelho-da-casa':       0,
     'feijo-carioquinha-com-bacon': 10,
     'frango-desfiado-suculento':    5,
   };
@@ -323,6 +347,15 @@
   window.monitoraEstoque = function() {
     document.querySelectorAll('.prato-item').forEach(async el => {
       const pratoId = el.dataset.nome.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+      const limite  = getLimite(pratoId);
+
+      // ESGOTADO IMEDIATO: limite 0 no código → aplica sem consultar Firebase
+      if (limite === 0) {
+        aplicaEstado(el, 0, pratoId);
+        return;
+      }
+
+      // COM ESTOQUE: monitora Firebase em tempo real
       await garanteEstoque(pratoId);
       const ref = doc(db, COL, pratoId);
       onSnapshot(ref, snap => {
@@ -331,7 +364,7 @@
     });
   };
 
-  // Desconta estoque ao confirmar pedido
+    // Desconta estoque ao confirmar pedido
   window.descontaEstoque = async function(pratos) {
     for (const p of pratos) {
       const pratoId = p.nome.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
@@ -426,9 +459,9 @@
       <div class="section-title">Escolha seus pratos</div>
       <div class="section-sub">Selecione os itens e a quantidade desejada. Cardápio atualizado a cada 15 dias.</div>
 
-      <div class="taxa-entrega">
+      <div class="taxa-entrega" id="taxa-entrega-generica">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="flex-shrink:0"><path d="M1 3h15v13H1zM16 8h4l3 3v5h-7V8z" stroke="#C4622A" stroke-width="1.5" stroke-linejoin="round"/><circle cx="5.5" cy="18.5" r="1.5" stroke="#C4622A" stroke-width="1.5"/><circle cx="18.5" cy="18.5" r="1.5" stroke="#C4622A" stroke-width="1.5"/></svg>
-        <span><strong>Taxa de entrega:</strong> R$ 10,00 a R$ 15,00 conforme sua região — informada pela Nat na confirmação do pedido.</span>
+        <span>Selecione seu bairro abaixo para ver o valor do frete.</span>
       </div>
       <div class="minimo-aviso">
         Pedido mínimo: <strong>R$ 60,00</strong>
@@ -544,13 +577,17 @@
             </optgroup>
           </select>
           <div class="bairro-fora" id="bairro-fora-msg">
-            Infelizmente ainda não entregamos nessa região ainda.
             Nossa área de entrega cobre até 10 km a partir do Rio Comprido.
             Em breve esperamos ampliar!<br>
             <a id="wpp-fora-link" href="#" target="_blank" class="bairro-fora-wpp">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.149-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.554 4.118 1.526 5.849L0 24l6.324-1.508A11.955 11.955 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.003-1.368l-.36-.214-3.713.885.916-3.617-.235-.372A9.818 9.818 0 012.182 12C2.182 6.57 6.57 2.182 12 2.182S21.818 6.57 21.818 12 17.43 21.818 12 21.818z"/></svg>
               Falar no WhatsApp
             </a>
+          </div>
+          <!-- Frete dinâmico -->
+          <div class="frete-info" id="frete-info">
+            <span class="frete-valor" id="frete-valor">—</span>
+            <span class="frete-texto" id="frete-texto"></span>
           </div>
           <div class="erro-msg">Selecione seu bairro.</div>
         </div>
@@ -1013,10 +1050,10 @@ function atualizaResumo() {
   resumo.classList.add('visible');
 
   let html = '';
-  let total = 0;
+  let subtotal = 0;
   pratos.forEach(p => {
     const sub = p.preco * p.qty;
-    total += sub;
+    subtotal += sub;
     html += `<div class="resumo-linha">
       <span class="resumo-label">${p.nome} × ${p.qty}</span>
       <span class="resumo-val">R$ ${sub.toFixed(2).replace('.',',')}</span>
@@ -1025,19 +1062,114 @@ function atualizaResumo() {
   if (semanaSelected) html += `<div class="resumo-linha"><span class="resumo-label">Entrega</span><span class="resumo-val">${semanaSelected}</span></div>`;
   if (turnoSelected)  html += `<div class="resumo-linha"><span class="resumo-label">Turno</span><span class="resumo-val">${turnoSelected}</span></div>`;
   if (pagSelected)    html += `<div class="resumo-linha"><span class="resumo-label">Pagamento</span><span class="resumo-val">${pagSelected}</span></div>`;
+
+  // Frete
+  const frete = freteAtual || 0;
+  const freteLabel = frete === 0
+    ? (document.getElementById('inp-bairro')?.value ? 'Grátis 🎉' : 'A confirmar')
+    : `R$ ${frete.toFixed(2).replace('.',',')}`;
+  html += `<div class="resumo-linha"><span class="resumo-label">Frete</span><span class="resumo-val">${freteLabel}</span></div>`;
+
+  const total = subtotal + frete;
   html += `<div class="resumo-linha"><span class="resumo-label">Total</span><span class="resumo-val resumo-total-val">R$ ${total.toFixed(2).replace('.',',')}</span></div>`;
   itens.innerHTML = html;
 }
 
+// ─────────────────────────────────────────────
+// TABELA DE FRETES POR BAIRRO
+// ─────────────────────────────────────────────
+// tier: 'gratis' | 'basico' | 'medio' | 'alto' | 'consulta'
+const FRETES = {
+  // ── Vizinhos imediatos (grátis ou simbólico)
+  'Rio Comprido':        { tier: 'gratis',  valor: 0,  label: 'Grátis',   texto: 'Você é nossa vizinha! Entrega gratuita 🧡' },
+  'Estácio':             { tier: 'gratis',  valor: 0,  label: 'Grátis',   texto: 'Pertinho! Entrega gratuita 🧡' },
+  'Catumbi':             { tier: 'gratis',  valor: 0,  label: 'Grátis',   texto: 'Pertinho! Entrega gratuita 🧡' },
+  'Cidade Nova':         { tier: 'basico',  valor: 8,  label: 'R$ 8',     texto: 'Entrega rápida — região central.' },
+  'Mangueira':           { tier: 'basico',  valor: 8,  label: 'R$ 8',     texto: 'Entrega rápida — região central.' },
+  'Praça da Bandeira':   { tier: 'basico',  valor: 8,  label: 'R$ 8',     texto: 'Entrega rápida — região central.' },
+  // ── Centro e arredores
+  'Centro':              { tier: 'basico',  valor: 10, label: 'R$ 10',    texto: 'Região central — entrega tranquila.' },
+  'Lapa':                { tier: 'basico',  valor: 10, label: 'R$ 10',    texto: 'Região central — entrega tranquila.' },
+  'Santa Teresa':        { tier: 'basico',  valor: 10, label: 'R$ 10',    texto: 'Região central — entrega tranquila.' },
+  'Glória':              { tier: 'basico',  valor: 10, label: 'R$ 10',    texto: 'Região central — entrega tranquila.' },
+  'Saúde':               { tier: 'basico',  valor: 10, label: 'R$ 10',    texto: 'Região central — entrega tranquila.' },
+  'Gamboa':              { tier: 'basico',  valor: 10, label: 'R$ 10',    texto: 'Região central — entrega tranquila.' },
+  'Santo Cristo':        { tier: 'basico',  valor: 10, label: 'R$ 10',    texto: 'Região central — entrega tranquila.' },
+  'Caju':                { tier: 'medio',   valor: 12, label: 'R$ 12',    texto: 'Um pouco mais longe, mas a gente vai!' },
+  // ── Grande Tijuca
+  'Tijuca':              { tier: 'basico',  valor: 10, label: 'R$ 10',    texto: 'Região da Tijuca — entrega tranquila.' },
+  'Andaraí':             { tier: 'basico',  valor: 10, label: 'R$ 10',    texto: 'Região da Tijuca — entrega tranquila.' },
+  'Vila Isabel':         { tier: 'basico',  valor: 10, label: 'R$ 10',    texto: 'Região da Tijuca — entrega tranquila.' },
+  'Maracanã':            { tier: 'basico',  valor: 10, label: 'R$ 10',    texto: 'Região da Tijuca — entrega tranquila.' },
+  'Grajaú':              { tier: 'medio',   valor: 12, label: 'R$ 12',    texto: 'Um pouco mais longe, mas a gente vai!' },
+  // ── Zona Norte próxima
+  'São Cristóvão':       { tier: 'basico',  valor: 10, label: 'R$ 10',    texto: 'Zona Norte próxima — entrega tranquila.' },
+  'Engenho Novo':        { tier: 'medio',   valor: 12, label: 'R$ 12',    texto: 'Zona Norte — um pouco mais longe.' },
+  'São Francisco Xavier':{ tier: 'medio',   valor: 12, label: 'R$ 12',    texto: 'Zona Norte — um pouco mais longe.' },
+  'Riachuelo':           { tier: 'medio',   valor: 12, label: 'R$ 12',    texto: 'Zona Norte — um pouco mais longe.' },
+  'Sampaio':             { tier: 'medio',   valor: 12, label: 'R$ 12',    texto: 'Zona Norte — um pouco mais longe.' },
+  'Rocha':               { tier: 'medio',   valor: 12, label: 'R$ 12',    texto: 'Zona Norte — um pouco mais longe.' },
+  'Encantado':           { tier: 'medio',   valor: 12, label: 'R$ 12',    texto: 'Zona Norte — um pouco mais longe.' },
+  'Méier':               { tier: 'medio',   valor: 15, label: 'R$ 15',    texto: 'Méier — um pouquinho mais longe 🛵' },
+  'Cachambi':            { tier: 'medio',   valor: 15, label: 'R$ 15',    texto: 'Zona Norte — um pouquinho mais longe 🛵' },
+  'Água Santa':          { tier: 'medio',   valor: 15, label: 'R$ 15',    texto: 'Zona Norte — um pouquinho mais longe 🛵' },
+  'Todos os Santos':     { tier: 'medio',   valor: 15, label: 'R$ 15',    texto: 'Zona Norte — um pouquinho mais longe 🛵' },
+  'Higienópolis':        { tier: 'medio',   valor: 15, label: 'R$ 15',    texto: 'Zona Norte — um pouquinho mais longe 🛵' },
+  // ── Zona Sul próxima
+  'Catete':              { tier: 'medio',   valor: 12, label: 'R$ 12',    texto: 'Zona Sul próxima — entrega disponível.' },
+  'Flamengo':            { tier: 'medio',   valor: 12, label: 'R$ 12',    texto: 'Zona Sul próxima — entrega disponível.' },
+  'Laranjeiras':         { tier: 'medio',   valor: 12, label: 'R$ 12',    texto: 'Zona Sul próxima — entrega disponível.' },
+  'Cosme Velho':         { tier: 'medio',   valor: 12, label: 'R$ 12',    texto: 'Zona Sul próxima — entrega disponível.' },
+  'Botafogo':            { tier: 'alto',    valor: 15, label: 'R$ 15',    texto: 'Zona Sul — entrega disponível 🛵' },
+  'Humaitá':             { tier: 'alto',    valor: 15, label: 'R$ 15',    texto: 'Zona Sul — entrega disponível 🛵' },
+  'Urca':                { tier: 'alto',    valor: 15, label: 'R$ 15',    texto: 'Zona Sul — entrega disponível 🛵' },
+};
+
+let freteAtual = 0; // valor do frete selecionado
+
 function validaBairro() {
-  const sel = document.getElementById('inp-bairro');
-  const msg = document.getElementById('bairro-fora-msg');
-  const isFora = sel.value === 'fora';
+  const sel     = document.getElementById('inp-bairro');
+  const msg     = document.getElementById('bairro-fora-msg');
+  const isFora  = sel.value === 'fora';
+  const bairro  = sel.value;
+
+  // Painel "fora da área"
   msg.classList.toggle('visible', isFora);
   if (isFora) {
     const texto = encodeURIComponent('Olá! Gostaria de fazer um pedido na Cozinha Geminiana, mas meu bairro não está na lista de entrega. Vocês conseguem atender minha região?');
     document.getElementById('wpp-fora-link').href = `https://wa.me/${WHATSAPP_NUM}?text=${texto}`;
   }
+
+  // Painel de frete
+  const freteEl   = document.getElementById('frete-info');
+  const valorEl   = document.getElementById('frete-valor');
+  const textoEl   = document.getElementById('frete-texto');
+  const taxaEl    = document.getElementById('taxa-entrega-generica');
+
+  if (!bairro || bairro === 'fora' || bairro === '') {
+    freteEl.className = 'frete-info';
+    freteAtual = 0;
+    if (taxaEl) taxaEl.style.display = '';
+    atualizaResumo();
+    return;
+  }
+
+  const f = FRETES[bairro];
+  if (f) {
+    freteEl.className = `frete-info visible frete-${f.tier}`;
+    valorEl.textContent = f.valor === 0 ? '🎉 Grátis' : `🛵 ${f.label}`;
+    textoEl.textContent = f.texto;
+    freteAtual = f.valor;
+    if (taxaEl) taxaEl.style.display = 'none'; // esconde o aviso genérico
+  } else {
+    freteEl.className = 'frete-info visible frete-consulta';
+    valorEl.textContent = '❓ A combinar';
+    textoEl.textContent = 'Frete a confirmar com a Nat pelo WhatsApp após o pedido.';
+    freteAtual = 0;
+    if (taxaEl) taxaEl.style.display = 'none';
+  }
+
+  atualizaResumo();
 }
 
 function setErro(id, ativo) {
@@ -1063,17 +1195,20 @@ async function enviarPedido() {
   if (!turnoSelected)    { alert('Escolha o turno de entrega.'); ok = false; }
   if (!pagSelected)      { alert('Escolha a forma de pagamento.'); ok = false; }
 
-  // Verifica mínimo
-  const total = pratos.reduce((s, p) => s + p.preco * p.qty, 0);
+  const subtotal = pratos.reduce((s, p) => s + p.preco * p.qty, 0);
+  const frete    = freteAtual || 0;
+  const total    = subtotal + frete;
   const qtdTotal = pratos.reduce((s, p) => s + p.qty, 0);
-  if (total < 60)    { alert(`Pedido mínimo é R$ 60,00. Seu pedido está em R$ ${total.toFixed(2).replace('.',',')}.`); ok = false; }
+  if (subtotal < 60) { alert(`Pedido mínimo é R$ 60,00 (sem o frete). Seu pedido está em R$ ${subtotal.toFixed(2).replace('.',',')}.`); ok = false; }
 
 
   if (!ok) return;
 
   const pratosTexto = pratos.map(p => `• ${p.nome} (${p.qty}x) — R$ ${(p.preco*p.qty).toFixed(2).replace('.',',')}`)
                              .join('\n');
-  const totalFmt = `R$ ${total.toFixed(2).replace('.',',')}`;
+  const freteTexto  = frete === 0 ? 'Grátis 🎉' : `R$ ${frete.toFixed(2).replace('.',',')}`;
+  const subtotalFmt = `R$ ${subtotal.toFixed(2).replace('.',',')}`;
+  const totalFmt    = `R$ ${total.toFixed(2).replace('.',',')}`;
 
   const mensagem =
     `*Novo pedido — Cozinha Geminiana*\n\n` +
@@ -1081,6 +1216,8 @@ async function enviarPedido() {
     `*WhatsApp:* ${wpp}\n` +
     `*Endereço:* ${end}, ${bairro}\n\n` +
     `*Pratos:*\n${pratosTexto}\n\n` +
+    `*Subtotal:* ${subtotalFmt}\n` +
+    `*Frete (${bairro}):* ${freteTexto}\n` +
     `*Total: ${totalFmt}*\n\n` +
     `*Entrega:* ${semanaSelected} — ${turnoSelected}\n` +
     `*Pagamento:* ${pagSelected}\n` +
