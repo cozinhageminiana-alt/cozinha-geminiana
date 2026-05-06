@@ -165,14 +165,25 @@
   .field textarea { resize: vertical; min-height: 70px; }
 
   /* ── PAGAMENTO ── */
-  .pagamento-opts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .pagamento-opts { display: flex; flex-direction: column; gap: 14px; }
+  .pag-grupo-label { font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--texto-muted); margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+  .pag-grupo-label::after { content: ''; flex: 1; height: 0.5px; background: var(--cinza-med); }
+  .pag-grupo-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .pag-card.destaque { border: 2px solid var(--verde); position: relative; }
   .pag-badge { font-size: 9px; background: var(--verde); color: #F0E8D5; padding: 2px 8px; border-radius: 10px; position: absolute; top: -10px; left: 50%; transform: translateX(-50%); white-space: nowrap; letter-spacing: 0.08em; }
-  .pag-card { border: 1px solid var(--cinza-med); border-radius: 8px; padding: 14px; cursor: pointer; text-align: center; transition: all .15s; background: #fff; }
-  .pag-card:hover { border-color: var(--verde-med); background: var(--bege-cl); }
-  .pag-card.selected { border-color: var(--verde); background: var(--verde-cl); }
+  .pag-card { border: 1px solid var(--cinza-med); border-radius: 10px; padding: 14px 12px; cursor: pointer; text-align: center; transition: all .15s; background: #fff; position: relative; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .pag-card:hover { border-color: var(--verde-med); background: var(--bege-cl); transform: translateY(-1px); box-shadow: 0 3px 10px rgba(0,0,0,0.07); }
+  .pag-card.selected { border-color: var(--verde); background: var(--verde-cl); box-shadow: 0 2px 8px rgba(26,44,26,0.13); }
+  .pag-icon { font-size: 22px; line-height: 1; margin-bottom: 2px; }
   .pag-nome { font-size: 13px; font-weight: 700; color: var(--texto); }
-  .pag-desc { font-size: 11px; color: var(--texto-muted); margin-top: 3px; }
+  .pag-desc { font-size: 10px; color: var(--texto-muted); margin-top: 2px; line-height: 1.4; }
+  .pag-card.selected .pag-nome { color: var(--verde); }
+  /* Campo de troco */
+  .troco-field { display: none; margin-top: 10px; }
+  .troco-field.visible { display: block; }
+  .troco-field label { font-size: 11px; font-weight: 600; color: var(--texto-muted); display: block; margin-bottom: 5px; }
+  .troco-field input { width: 100%; padding: 9px 12px; border: 1px solid var(--cinza-med); border-radius: 8px; font-size: 13px; font-family: inherit; box-sizing: border-box; }
+  .troco-field input:focus { outline: none; border-color: var(--verde-med); }
 
   /* ── RESUMO ── */
   .resumo { background: var(--amarelo-cl); border: 1px solid var(--amarelo); border-radius: 12px; padding: 20px 24px; margin-bottom: 20px; display: none; }
@@ -236,7 +247,7 @@
     .form-grid { grid-template-columns: 1fr; }
     .form-full { grid-column: 1; }
     .turnos-grid { grid-template-columns: 1fr; }
-    .pagamento-opts { grid-template-columns: 1fr; }
+    .pag-grupo-cards { grid-template-columns: 1fr; }
     .prato-item { flex-wrap: wrap; }
   }
 
@@ -252,7 +263,7 @@
     .cat-title    { font-size: 13px; }
     .semana-desc  { font-size: 11px; }
     .pag-card     { padding: 10px 12px; }
-    .pag-nome     { font-size: 13px; }
+    .pag-nome     { font-size: 12px; }
     .pag-desc     { font-size: 10px; }
     .btn-enviar   { font-size: 14px; padding: 14px; }
   }
@@ -618,24 +629,50 @@
     <!-- ④ PAGAMENTO -->
     <div class="section">
       <div class="section-title">Forma de pagamento</div>
-      <div class="section-sub">Escolha como prefere pagar. Pagamento antecipado garante seu lugar na fila de produção.</div>
+      <div class="section-sub">Pix e transferência confirmam seu pedido na hora. Cartão e dinheiro são pagos na entrega.</div>
       <div class="pagamento-opts">
-        <div class="pag-card" data-pag="Pix" data-tipo="antecipado" onclick="selectPag(this)">
-          <div class="pag-nome">Pix</div>
-          <div class="pag-desc">Chave enviada por WhatsApp após confirmação</div>
+
+        <div>
+          <div class="pag-grupo-label">Pague antes — confirma na hora</div>
+          <div class="pag-grupo-cards">
+            <div class="pag-card destaque" data-pag="Pix" data-tipo="antecipado" onclick="selectPag(this)">
+              <span class="pag-badge">Recomendado</span>
+              <div class="pag-icon">⚡</div>
+              <div class="pag-nome">Pix</div>
+              <div class="pag-desc">Chave enviada por WhatsApp. Pedido confirmado na hora.</div>
+            </div>
+            <div class="pag-card" data-pag="Transferência bancária" data-tipo="antecipado" onclick="selectPag(this)">
+              <div class="pag-icon">🏦</div>
+              <div class="pag-nome">Transferência</div>
+              <div class="pag-desc">Dados bancários enviados por WhatsApp.</div>
+            </div>
+          </div>
         </div>
-        <div class="pag-card" data-pag="Transferência bancária" data-tipo="antecipado" onclick="selectPag(this)">
-          <div class="pag-nome">Transferência</div>
-          <div class="pag-desc">Dados enviados por WhatsApp após confirmação</div>
+
+        <div>
+          <div class="pag-grupo-label">Pague na entrega</div>
+          <div class="pag-grupo-cards">
+            <div class="pag-card" data-pag="Cartão na entrega (maquininha)" data-tipo="entrega" onclick="selectPag(this)">
+              <div class="pag-icon">💳</div>
+              <div class="pag-nome">Cartão</div>
+              <div class="pag-desc">Débito ou crédito na maquininha.</div>
+            </div>
+            <div class="pag-card" data-pag="Dinheiro na entrega" data-tipo="entrega" onclick="selectPag(this)">
+              <div class="pag-icon">💵</div>
+              <div class="pag-nome">Dinheiro</div>
+              <div class="pag-desc">Pagamento em espécie na entrega.</div>
+            </div>
+          </div>
         </div>
-        <div class="pag-nome">Cartão online</div>
-          <div class="pag-desc"></div>
-        </div>
-        <div class="pag-card" data-pag="Cartão na entrega (maquininha)" data-tipo="entrega" onclick="selectPag(this)">
-          <div class="pag-nome">Cartão na entrega</div>
-          <div class="pag-desc">Débito ou crédito na maquininha no momento da entrega</div>
-        </div>
+
       </div>
+
+      <!-- Campo de troco — aparece só ao selecionar Dinheiro -->
+      <div class="troco-field" id="troco-field">
+        <label>💬 Vai precisar de troco? Informe o valor que vai pagar:</label>
+        <input type="text" id="inp-troco" placeholder="Ex: R$ 50,00" inputmode="numeric">
+      </div>
+
     </div>
 
     <!-- RESUMO -->
@@ -1021,6 +1058,9 @@ function selectPag(el) {
   document.querySelectorAll('.pag-card').forEach(c => c.classList.remove('selected'));
   el.classList.add('selected');
   pagSelected = el.dataset.pag;
+  // Mostrar campo de troco só para Dinheiro
+  const trocoField = document.getElementById('troco-field');
+  if (trocoField) trocoField.classList.toggle('visible', pagSelected === 'Dinheiro na entrega');
   atualizaResumo();
 }
 
@@ -1233,32 +1273,35 @@ async function enviarPedido() {
   const subtotalFmt = `R$ ${subtotal.toFixed(2).replace('.',',')}`;
   const totalFmt    = `R$ ${total.toFixed(2).replace('.',',')}`;
 
+  // Detalhe do pagamento — label legível + momento (antes/na entrega)
+  const pagMomento = ['Pix', 'Transferência bancária'].includes(pagSelected)
+    ? '(pagamento antecipado)'
+    : '(pagar na entrega)';
+  const trocoVal = document.getElementById('inp-troco')?.value?.trim();
+  const trocoLinha = (pagSelected === 'Dinheiro na entrega' && trocoVal)
+    ? `\n*Troco para:* ${trocoVal}` : '';
+
   const mensagem =
-    `*Novo pedido — Cozinha Geminiana*\n\n` +
+    `*🧑‍🍳 Novo pedido — Cozinha Geminiana*\n` +
+    `━━━━━━━━━━━━━━━━\n\n` +
     `*Cliente:* ${nome}\n` +
     `*WhatsApp:* ${wpp}\n` +
     `*Endereço:* ${end}, ${bairro}\n\n` +
     `*Pratos:*\n${pratosTexto}\n\n` +
     `*Subtotal:* ${subtotalFmt}\n` +
-    `*Frete (${bairro}):* ${freteTexto}\n` +
+    `*Frete:* ${freteTexto} (${bairro})\n` +
     `*Total: ${totalFmt}*\n\n` +
+    `━━━━━━━━━━━━━━━━\n` +
     `*Entrega:* ${semanaSelected} — ${turnoSelected}\n` +
-    `*Pagamento:* ${pagSelected}\n` +
-    (obs ? `*Obs:* ${obs}` : '');
+    `*Pagamento:* ${pagSelected} ${pagMomento}${trocoLinha}\n` +
+    (obs ? `*Obs:* ${obs}\n` : '');
 
   const encoded = encodeURIComponent(mensagem);
   const wppHref = `https://wa.me/${WHATSAPP_NUM}?text=${encoded}`;
 
-    if (pagSelected === 'Cartão de crédito/débito online') {
-    window.open(MERCADO_PAGO_LINK, '_blank');
-    document.getElementById('wpp-link').href = wppHref;
-    document.getElementById('sucesso-msg').innerHTML =
-      `Obrigada, <strong>${nome}</strong>! Seu pedido foi enviado. ✅`;
-  } else {
     document.getElementById('wpp-link').href = wppHref;
     document.getElementById('sucesso-msg').innerHTML =
       `Obrigada, <strong>${nome}</strong>! Seu pedido no valor de <strong>${totalFmt}</strong> está pronto para ser enviado.`;
-  }
 
   // Desconta estoque no Firebase
   // Desconta estoque sem bloquear o fluxo — se Firebase falhar, pedido segue normalmente
