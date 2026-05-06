@@ -563,7 +563,7 @@
               <option>Todos os Santos</option>
               <option>Higienópolis</option>
             </optgroup>
-            <optgroup label="── Zona Sul próxima">
+            <optgroup label="── Zona Sul (próxima)">
               <option>Catete</option>
               <option>Flamengo</option>
               <option>Laranjeiras</option>
@@ -571,6 +571,18 @@
               <option>Botafogo</option>
               <option>Humaitá</option>
               <option>Urca</option>
+            </optgroup>
+            <optgroup label="── Zona Sul">
+              <option>Copacabana</option>
+              <option>Leme</option>
+              <option>Ipanema</option>
+              <option>Leblon</option>
+              <option>Lagoa</option>
+              <option>Jardim Botânico</option>
+              <option>Gávea</option>
+              <option>São Conrado</option>
+              <option>Vidigal</option>
+              <option>Rocinha</option>
             </optgroup>
             <optgroup label="── Fora da área de entrega">
               <option value="fora">Meu bairro não está na lista</option>
@@ -715,7 +727,7 @@ const CARDAPIOS = {
         cat: "Preparos Coringa 🧑‍🍳",
         info: "Versátil para a semana toda — use em lanches, massas, arroz e muito mais!",
         pratos: [
-          { nome: "Frango desfiado suculento", linha: "dia", preco: 24, desc: "Simples, bem temperado e versátil", qtd: "250g" },
+          { nome: "Frango desfiado suculento", linha: "dia", preco: 24, desc: "Simples, bem temperado e versátil", qtd: "300g" },
         ]
       }
     ]
@@ -1123,6 +1135,17 @@ const FRETES = {
   'Botafogo':            { tier: 'alto',    valor: 15, label: 'R$ 15',    texto: 'Zona Sul — entrega disponível 🛵' },
   'Humaitá':             { tier: 'alto',    valor: 15, label: 'R$ 15',    texto: 'Zona Sul — entrega disponível 🛵' },
   'Urca':                { tier: 'alto',    valor: 15, label: 'R$ 15',    texto: 'Zona Sul — entrega disponível 🛵' },
+  // ── Zona Sul
+  'Copacabana':          { tier: 'alto',    valor: 15, label: 'R$ 15',    texto: 'Zona Sul — entrega disponível 🛵' },
+  'Leme':                { tier: 'alto',    valor: 15, label: 'R$ 15',    texto: 'Zona Sul — entrega disponível 🛵' },
+  'Ipanema':             { tier: 'alto',    valor: 15, label: 'R$ 15',    texto: 'Zona Sul — entrega disponível 🛵' },
+  'Leblon':              { tier: 'alto',    valor: 15, label: 'R$ 15',    texto: 'Zona Sul — entrega disponível 🛵' },
+  'Lagoa':               { tier: 'alto',    valor: 15, label: 'R$ 15',    texto: 'Zona Sul — entrega disponível 🛵' },
+  'Jardim Botânico':     { tier: 'alto',    valor: 15, label: 'R$ 15',    texto: 'Zona Sul — entrega disponível 🛵' },
+  'Gávea':               { tier: 'alto',    valor: 15, label: 'R$ 15',    texto: 'Zona Sul — entrega disponível 🛵' },
+  'São Conrado':         { tier: 'alto',    valor: 15, label: 'R$ 15',    texto: 'Zona Sul — entrega disponível 🛵' },
+  'Vidigal':             { tier: 'alto',    valor: 15, label: 'R$ 15',    texto: 'Zona Sul — entrega disponível 🛵' },
+  'Rocinha':             { tier: 'alto',    valor: 15, label: 'R$ 15',    texto: 'Zona Sul — entrega disponível 🛵' },
 };
 
 let freteAtual = 0; // valor do frete selecionado
