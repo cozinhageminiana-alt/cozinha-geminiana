@@ -74,6 +74,11 @@
   /* ── PRATOS ── */
   .prato-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border-radius: 8px; border: 0.5px solid var(--cinza-med); margin-bottom: 7px; cursor: pointer; transition: border-color .15s, background .15s; background: #fff; flex-wrap: nowrap; }
   .prato-item.esgotado { background: #FAFAFA; border-color: #E8E4E0; opacity: 0.65; cursor: not-allowed; }
+  .qty-btn:disabled { opacity: 0.25; cursor: not-allowed; pointer-events: none; }
+  .limite-msg { display: none; font-size: 10px; color: #7A3A00; background: #FFF3E0; border: 1px solid #FFD0A0; border-radius: 8px; padding: 7px 10px; margin-top: 6px; line-height: 1.5; }
+  .limite-msg.visible { display: block; }
+  .limite-msg a { color: var(--laranja); font-weight: 700; text-decoration: none; }
+  .limite-msg a:hover { text-decoration: underline; }
   .prato-item.esgotado .prato-nome { font-size: 14px; font-weight: 600; color: var(--texto); line-height: 1.3; }
   .prato-item:hover { border-color: var(--verde-med); background: var(--bege-cl); }
   .prato-item.selected { border-color: var(--verde); background: var(--verde-cl); }
@@ -268,54 +273,30 @@
     .btn-enviar   { font-size: 14px; padding: 14px; }
   }
 </style>
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
-  import { getFirestore, doc, getDoc, updateDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+<script>
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyBg0Nw5UqGKVtMq6Q34_RUaoZzhawy0OIs",
-    authDomain: "cozinhageminiana-1dee7.firebaseapp.com",
-    projectId: "cozinhageminiana-1dee7",
-    storageBucket: "cozinhageminiana-1dee7.firebasestorage.app",
-    messagingSenderId: "181751393390",
-    appId: "1:181751393390:web:e9ccf53a4657a12649ca7f",
-    measurementId: "G-FH5KD1KN9Z"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const db  = getFirestore(app);
 
   const LIMITES = {
-    'frango-mineiro':              10,
-    'carne-de-panela-da-nat':       9,
-    'strogonoff-de-frango':         9,
-    'feijo-porcudo':                9,
-    'chilli-de-inverno':            9,
-    'fradinho-carioca':            10,
-    'caldo-verde':                 10,
-    'caponata-da-casa':            10,
-    'homus':                        8,
-    'feijo-vermelho-da-casa':       0,
-    'feijo-carioquinha-com-bacon': 10,
+    'frango-mineiro':               6,
+    'carne-de-panela-da-nat':       0,
+    'strogonoff-de-frango':         2,
+    'feijao-porcudo':               6,
+    'chilli-de-inverno':            7,
+    'fradinho-carioca':             8,
+    'caldo-verde':                  12,
+    'caponata-da-casa':             7,
+    'homus':                        4,
+    'feijao-vermelho-da-casa':      0,
+    'feijao-carioquinha-com-bacon': 1,
     'frango-desfiado-suculento':    0,
   };
   function getLimite(pratoId) { return LIMITES[pratoId] ?? 10; }
-  const COL    = 'estoque';
-
-  // Garante que o doc existe com estoque inicial
-  async function garanteEstoque(pratoId) {
-    const ref = doc(db, COL, pratoId);
-    const snap = await getDoc(ref);
-    if (!snap.exists()) {
-      await setDoc(ref, { vendido: 0 });
-    }
-    return snap.exists() ? snap.data().vendido : 0;
-  }
-
   // Aplica estado esgotado/disponível visualmente
   function aplicaEstado(el, vendido, pratoId) {
     const disponivel = getLimite(pratoId) - vendido;
     const esgotado   = disponivel <= 0;
+    // Salva disponível no card para changeQty consultar em tempo real
+    el.dataset.disponivel = disponivel;
 
     // Classe visual
     el.classList.toggle('esgotado', esgotado);
@@ -335,57 +316,61 @@
     if (!badge) {
       badge = document.createElement('div');
       badge.className = 'badge-estoque';
-      badge.style.cssText = 'font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:2px 8px;border-radius:20px;margin-top:4px;display:inline-block;';
-      const infoEl = el.querySelector('.prato-info') || el.querySelector('.prato-nome')?.parentElement;
-      if (infoEl) infoEl.appendChild(badge);
+      badge.style.cssText = 'font-size:10px;font-weight:700;letter-spacing:.04em;padding:3px 10px;border-radius:20px;margin-top:5px;display:inline-block;';
+      const infoEl = el.querySelector('.prato-info') ?? el;
+      infoEl.appendChild(badge);
     }
 
     if (esgotado) {
       badge.textContent      = '🔴 Esgotado';
       badge.style.background = '#FCEBEB';
       badge.style.color      = '#791F1F';
-    } else if (disponivel <= 3) {
-      badge.textContent      = `⚠️ Últimas ${disponivel}!`;
-      badge.style.background = '#FFF8E1';
-      badge.style.color      = '#7B6000';
+      badge.style.border     = '1px solid #F5C6C6';
+    } else if (disponivel === 1) {
+      badge.textContent      = 'Última unidade! 🔥';
+      badge.style.background = '#FFF0EB';
+      badge.style.color      = '#7A2000';
+      badge.style.border     = '1px solid #FFBDA8';
+    } else if (disponivel === 2) {
+      badge.textContent      = 'Últimos dois! ⚡';
+      badge.style.background = '#FFF6E8';
+      badge.style.color      = '#7A4500';
+      badge.style.border     = '1px solid #FFD599';
     } else {
       badge.textContent      = '';
       badge.style.background = '';
+      badge.style.border     = '';
     }
+
+    // Trava o botão + se esgotado (estado do card, não da qty)
+    var _btns = el.querySelectorAll('.qty-btn');
+    var _btnMais = _btns[_btns.length - 1];
+    if (_btnMais) { _btnMais.disabled = esgotado; }
   }
 
   // Monitora estoque em tempo real para todos os pratos visíveis
   window.monitoraEstoque = function() {
     document.querySelectorAll('.prato-item').forEach(async el => {
-      const pratoId = el.dataset.nome.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+      const pratoId = el.dataset.nome.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
       const limite  = getLimite(pratoId);
 
-      // ESGOTADO IMEDIATO: limite 0 no código → aplica sem consultar Firebase
-      if (limite === 0) {
-        aplicaEstado(el, 0, pratoId);
-        return;
-      }
-
-      // COM ESTOQUE: monitora Firebase em tempo real
-      await garanteEstoque(pratoId);
-      const ref = doc(db, COL, pratoId);
-      onSnapshot(ref, snap => {
-        if (snap.exists()) aplicaEstado(el, snap.data().vendido, pratoId);
-      });
+      // Aplica estado visual (badge + esgotado) com base no LIMITES do HTML
+      // vendido=0 pois não há Firebase — estoque é controlado manualmente no código
+      aplicaEstado(el, 0, pratoId);
     });
   };
 
-    // Desconta estoque ao confirmar pedido
-  window.descontaEstoque = async function(pratos) {
-    for (const p of pratos) {
-      const pratoId = p.nome.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-      const ref = doc(db, COL, pratoId);
-      const snap = await getDoc(ref);
-      const atual = snap.exists() ? snap.data().vendido : 0;
-      await updateDoc(ref, { vendido: atual + p.qty });
-    }
-  };
+  // Sinaliza que a função está pronta
+  window.dispatchEvent(new Event('monitoraEstoqueReady'));
 
+  // Fallback DOMContentLoaded — garante que roda mesmo se os cards chegarem antes
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => window.monitoraEstoque());
+  } else {
+    Promise.resolve().then(() => window.monitoraEstoque());
+  }
+
+    // Desconta estoque ao confirmar pedido
   // Inicia monitoramento quando DOM estiver pronto
   document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => window.monitoraEstoque(), 500);
@@ -920,6 +905,7 @@ cd.grupos.forEach(grupo => {
         <div class="prato-nome">${p.nome}</div>
         <div class="prato-desc">${p.desc}</div>
         <div class="prato-qtd">${p.qtd || ''}</div>
+        <div class="limite-msg" id="limite-${p.nome.toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'')}"></div>
       </div>
       <span class="badge-linha badge-${p.linha}">${badgeLabel(p.linha)}</span>
       <div class="prato-preco">R$ ${p.preco.toFixed(2).replace('.',',')}</div>
@@ -934,6 +920,10 @@ cd.grupos.forEach(grupo => {
 
 painel.innerHTML = html;
 paineisEl.appendChild(painel);
+
+// Inicia monitoramento de estoque logo após os cards estarem no DOM
+if (window.monitoraEstoque) window.monitoraEstoque();
+else window.addEventListener('monitoraEstoqueReady', () => window.monitoraEstoque());
 
 function badgeLabel(linha) {
   const map = { premium:'Premium', dia:'Dia a dia', intl:'Internacional', petisco:'Petisco', saude:'Saúde', caldos:'Caldos' };
@@ -1070,21 +1060,50 @@ function togglePrato(el, e) {
   if (el.classList.contains('esgotado')) return;
   el.classList.toggle('selected');
   if (el.classList.contains('selected')) {
-    const numEl = el.querySelector('.qty-num');
+    var numEl = el.querySelector('.qty-num');
     if (numEl) numEl.textContent = '1';
     el.dataset.qty = '1';
+    // Reabilitar botão + ao selecionar (começa com qty=1, sempre há pelo menos 1)
+    var btns = el.querySelectorAll('.qty-btn');
+    var btnP = btns[btns.length - 1];
+    var nome = el.dataset.nome || '';
+    var pid  = nome.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'');
+    var lim  = getLimite(pid);
+    if (btnP) btnP.disabled = (lim <= 1);
   }
   if (typeof atualizaResumo === 'function') atualizaResumo();
 }
 function changeQty(e, btn, delta) {
   e.stopPropagation();
-  const item = btn.closest('.prato-item');
-  const num  = item.querySelector('.qty-num');
+  const item  = btn.closest('.prato-item');
+  const num   = item.querySelector('.qty-num');
+  const nome  = item.dataset.nome || '';
+  const pid   = nome.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'');
+  const limite = getLimite(pid);
+  const msg   = item.querySelector('.limite-msg');
   let q = parseInt(num.textContent) + delta;
-  if (q < 1) { item.classList.remove('selected'); q = 1; }
+  if (q < 1) { q = 1; }
+  if (q >= limite && delta > 0) {
+    // Cliente tentou passar do limite — trava e mostra mensagem
+    q = limite;
+    if (msg) {
+      var wpp = typeof WHATSAPP_NUM !== 'undefined' ? WHATSAPP_NUM : '5521996445384';
+      var txt = encodeURIComponent('Olá! Quero encomendar ' + nome + '. Vi que o estoque está limitado — conseguem reservar para mim?');
+      msg.innerHTML = 'Temos só ' + limite + (limite === 1 ? ' unidade' : ' unidades') + ' disponíveis agora. Quer mais? <a href="https://wa.me/' + wpp + '?text=' + txt + '" target="_blank">👉 Encomendar pelo WhatsApp</a>';
+      msg.classList.add('visible');
+      clearTimeout(msg._t);
+      msg._t = setTimeout(function(){ msg.classList.remove('visible'); }, 8000);
+    }
+  } else {
+    if (msg) msg.classList.remove('visible');
+  }
   num.textContent = q;
+  var allBtns = item.querySelectorAll('.qty-btn');
+  var btnMais = allBtns[allBtns.length - 1];
+  if (btnMais) btnMais.disabled = (q >= limite);
   atualizaResumo();
 }
+
 
 function getPratos() {
   return [...document.querySelectorAll('.prato-item.selected')].map(el => ({
@@ -1303,13 +1322,7 @@ async function enviarPedido() {
     document.getElementById('sucesso-msg').innerHTML =
       `Obrigada, <strong>${nome}</strong>! Seu pedido no valor de <strong>${totalFmt}</strong> está pronto para ser enviado.`;
 
-  // Desconta estoque no Firebase
-  // Desconta estoque sem bloquear o fluxo — se Firebase falhar, pedido segue normalmente
-  try {
-    if (window.descontaEstoque) await window.descontaEstoque(pratos);
-  } catch(e) {
-    console.warn('Estoque não atualizado:', e);
-  }
+
   document.getElementById('form-wrap').style.display = 'none';
   document.getElementById('sucesso').classList.add('visible');
 }
