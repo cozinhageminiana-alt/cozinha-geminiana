@@ -102,13 +102,15 @@
   .qty-num { font-size: 14px; font-weight: 700; color: var(--verde); min-width: 18px; text-align: center; }
 
   /* ── BADGES ── */
-  .badge-linha { display: none; }
+  .badge-linha { display: inline-block; font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 20px; white-space: nowrap; flex-shrink: 0; margin-left: auto; align-self: flex-start; }
   .badge-premium  { background: #FAECE7; color: #712B13; }
   .badge-dia      { background: #EAF3DE; color: #27500A; }
   .badge-intl     { background: #E6F1FB; color: #0C447C; }
   .badge-petisco  { background: #FAEEDA; color: #633806; }
   .badge-saude    { background: #E1F5EE; color: #085041; }
   .badge-caldos   { background: #EDE8F5; color: #3C3489; }
+  .badge-fit      { background: #E1F5EE; color: #085041; }
+  .badge-copa     { background: #009C3B; color: #FFDF00; font-weight: 700; }
 
   /* ── SELETOR DE BAIRRO ── */
   .bairro-fora { display: none; background: #FCEBEB; border: 1px solid #F09595; border-radius: 8px; padding: 12px 16px; margin-top: 10px; font-size: 12px; color: #791F1F; line-height: 1.6; }
@@ -272,23 +274,78 @@
     .pag-desc     { font-size: 10px; }
     .btn-enviar   { font-size: 14px; padding: 14px; }
   }
+
+  /* ── Seção Copa do Mundo ── */
+  .grupo-copa .cat-label-copa {
+    background: linear-gradient(135deg, #009C3B 0%, #006828 100%);
+    color: #FFDF00;
+    border-radius: 10px;
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+    border: 2px solid #FFDF00;
+    box-shadow: 0 2px 8px rgba(0,156,59,0.25);
+  }
+  .grupo-copa .info-copa {
+    background: linear-gradient(135deg, #009C3B15, #FFDF0015);
+    border-left: 3px solid #009C3B;
+    border-radius: 0 8px 8px 0;
+    padding: 9px 13px;
+    margin-bottom: 10px;
+    font-size: 11px;
+    color: #004D1A;
+    line-height: 1.55;
+    font-weight: 500;
+  }
+  .grupo-copa .prato-item {
+    border-color: #009C3B55;
+    background: #F0FBF4;
+  }
+  .grupo-copa .prato-item:hover {
+    border-color: #009C3B;
+    background: #E0F5E9;
+  }
+  .grupo-copa .prato-item.selected {
+    border-color: #009C3B;
+    background: #D0F0DC;
+  }
+  .grupo-copa .prato-preco {
+    color: #006828;
+    font-weight: 700;
+  }
+
 </style>
 <script>
 
 
-  const LIMITES = {
-    'frango-mineiro':               0,
-    'carne-de-panela-da-nat':     1,
-    'strogonoff-de-frango':         4,
-    'feijao-porcudo':               6,
-    'chilli-de-inverno':            7,
-    'fradinho-carioca':             8,
-    'caldo-verde':                  11,
-    'caponata-da-casa':             2,
-    'homus':                        0,
-    'feijao-vermelho-da-casa':      0,
-    'feijao-carioquinha-com-bacon': 1,
-    'frango-desfiado-suculento':    0,
+    const LIMITES = {
+    'arroz-aromatico-com-amendoas': 5,
+    'arroz-colorido': 8,
+    'brocolis-com-alho': 5,
+    'mix-de-quinoa-com-alho-poro': 5,
+    'salada-de-lentilha': 5,
+    'vaca-atolada': 10,
+    'caponata-da-casa': 10,
+    'chilli-de-inverno': 10,
+    'fallafel': 10,
+    'iscas-de-frango-empanadas': 10,
+    'arroz-de-costela': 10,
+    'carne-de-panela-da-nat': 10,
+    'costela-suina-ao-bbq': 8,
+    'escondidinho-de-carne': 8,
+    'feijao-porcudo': 10,
+    'frango-mineiro': 10,
+    'fricasse-de-frango': 8,
+    'strogonoff-de-frango': 10,
+    'carne-moida-temperadinha': 8,
+    'frango-desfiado-suculento': 10,
+    'caldo-verde': 11,
   };
   function getLimite(pratoId) { return LIMITES[pratoId] ?? 10; }
   // Aplica estado esgotado/disponível visualmente
@@ -437,7 +494,7 @@
       </div>
       <div style="display:flex;gap:12px;align-items:flex-start;">
         <div style="width:26px;height:26px;border-radius:50%;background:#E8651A;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;">2</div>
-        <p style="font-size:12px;color:#C8DCC0;line-height:1.6;margin:3px 0 0;"><strong style="color:#F5F0E0;">Escolha a data de entrega</strong> — este fim de semana ou o próximo. Pedidos aceitos até quinta-feira.</p>
+        <p style="font-size:12px;color:#C8DCC0;line-height:1.6;margin:3px 0 0;"><strong style="color:#F5F0E0;">Escolha a data de entrega</strong> — este fim de semana ou o próximo. Pedidos realizados até quinta recebem naquele mesmo fim de semana.</p>
       </div>
       <div style="display:flex;gap:12px;align-items:flex-start;">
         <div style="width:26px;height:26px;border-radius:50%;background:#E8651A;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;">3</div>
@@ -481,6 +538,7 @@
         <div class="legenda-item"><span class="badge-linha badge-petisco">Petisco</span></div>
         <div class="legenda-item"><span class="badge-linha badge-saude">Saúde</span></div>
         <div class="legenda-item"><span class="badge-linha badge-caldos">Caldos</span></div>
+        <div class="legenda-item"><span class="badge-linha badge-copa">🇧🇷 Copa</span></div>
       </div>
 
       <!-- Painéis de cardápio por semana -->
@@ -490,7 +548,7 @@
     <!-- ② AGENDAMENTO -->
     <div class="section">
       <div class="section-title">Agendar entrega</div>
-      <div class="section-sub">Escolha a data de entrega. Pedidos abertos até quinta-feira · Sexta: só tarde · Sábado: manhã ou tarde · Domingo: só manhã.</div>
+      <div class="section-sub">Escolha a data de entrega. Pedidos até quinta-feira · Entrega sexta (tarde), sábado (manhã ou tarde) ou domingo (manhã).</div>
 
       <div id="semanas-grid"></div>
 
@@ -714,50 +772,55 @@ const semanaAtiva = '1'; // ← ALTERE AQUI para mudar o cardápio
 
 const CARDAPIOS = {
     '1': {
-    label: "Cardápio 1",
-    descricao: "Entrega sexta-feira · Pedidos até quarta-feira",
+    label: "Cardápio atual",
+    descricao: "Pedidos até quinta · Entrega no fim de semana",
     grupos: [
       {
-        cat: "Prato Feito — marmita completa 🍽️",
-        info: "Prato principal + arroz + feijão. Tudo no mesmo pote, feito com carinho.",
+        cat: "⚽ Copa do Mundo — Petiscos pra torcer com o Brasil!",
+        info: "Vai um petisco aí? Chegam congelados e ficam prontos em minutos na airfryer. Perfeitos pra torcer junto! 🟡🟢",
         pratos: [
-          { nome: "Frango mineiro",         linha: "dia", preco: 27, desc: "Sobrecoxa em cubos com quiabo ao molho caseiro, acompanha arroz integral e feijão carioquinha", qtd: "400g" },
-          { nome: "Carne de Panela da Nat", linha: "dia", preco: 30, desc: "Desmanchando, com aipim macio e gosto de comida feita sem pressa, acompanha arroz e feijão", qtd: "400g" },
+          { nome: "Caponata da Casa", linha: "copa", preco: 20, desc: "Berinjela macia, agridoce, picante na medida e cheia de personalidade", qtd: "300g" },
+          { nome: "Chilli de Inverno", linha: "copa", preco: 35, desc: "Encorpado, levemente picante e feito pra aquecer por dentro", qtd: "400g" },
+          { nome: "Fallafel", linha: "copa", preco: 23, desc: "Bolinhos de grão-de-bico temperados com ervas frescas e especiarias, crocantes por fora e macios por dentro.", qtd: "200g" },
+          { nome: "Iscas de frango empanadas", linha: "copa", preco: 30, desc: "Tiras de frango marinadas e empanadas, crocantes por fora e macias por dentro. Coloque na airfryer por 8 min e aproveite!", qtd: "200g" }
         ]
       },
       {
         cat: "Pratos principais 🥘",
         pratos: [
-          { nome: "Strogonoff de Frango", linha: "dia",     preco: 40, desc: "Sobrecoxa de frango com shitake fresco e creme de leite. Reaquecer em fogo baixo mexendo sempre", qtd: "400g" },
-          { nome: "Feijão porcudo",       linha: "dia",     preco: 36, desc: "Feijão vermelho com costela suína, bacon defumado e linguiça calabresa", qtd: "450g" },
-          { nome: "Chilli de Inverno",    linha: "intl",    preco: 33, desc: "Encorpado, levemente picante e feito pra aquecer por dentro", qtd: "400g" },
-          ,
-          { nome: "Caldo verde",          linha: "caldos",  preco: 20, desc: "Cremoso, aromático e feito pra desacelerar o dia", qtd: "350ml" },
+          { nome: "Arroz de costela", linha: "dia", preco: 40, desc: "Arroz cozido no caldo da costela desfiada, absorvendo todo o sabor.", qtd: "400g" },
+          { nome: "Carne de Panela da Nat", linha: "dia", preco: 40, desc: "Desmanchando, com aipim macio e gosto de comida feita sem pressa", qtd: "400g" },
+          { nome: "Costela suína ao BBQ", linha: "dia", preco: 43, desc: "Costela suína cozida lentamente e envolvida em molho barbecue artesanal, equilibrando notas defumadas e adocicadas.", qtd: "450g" },
+          { nome: "Escondidinho de carne", linha: "fit", preco: 38, desc: "Camadas de purê de batata doce e carne moída bem temperada para criar uma combinação aconchegante.", qtd: "400g" },
+          { nome: "Feijão porcudo", linha: "dia", preco: 40, desc: "Feijão vermelho robusto, cheio de sabor e sustância", qtd: "450g" },
+          { nome: "Frango mineiro", linha: "dia", preco: 40, desc: "Sobrecoxa em cubos ao molho de tomate caseiro com quiabo", qtd: "400g" },
+          { nome: "Fricassê de Frango", linha: "dia", preco: 40, desc: "Frango desfiado envolvido em um creme aveludado de milho e requeijão, finalizado para entregar cremosidade a cada garfada", qtd: "450g" },
+          { nome: "Strogonoff de Frango", linha: "dia", preco: 43, desc: "Sobrecoxa com cogumelos num molho à base de creme de leite", qtd: "400g" }
         ]
       },
       {
-        cat: "Petiscos & Aperitivos 🥢",
+        cat: "Acompanhamentos 🥗",
         pratos: [
-		{ nome: "Fradinho carioca",     linha: "petisco", preco: 30, desc: "Feijão fradinho com carne seca, banana da terra, bacon e queijo coalho", qtd: "400g" },
-		
-          { nome: "Caponata da Casa", linha: "petisco", preco: 25, desc: "Berinjela macia, agridoce, picante na medida e cheia de personalidade", qtd: "200g" },
-          
-		  { nome: "Homus",            linha: "petisco", preco: 18, desc: "Grão de bico cremoso com tahine, limão e azeite. Artesanal, sem conservante", qtd: "300g" },
-		  
+          { nome: "Arroz Aromático com Amêndoas", linha: "premium", preco: 28, desc: "Arroz perfumado e soltinho finalizado com amêndoas levemente tostadas, trazendo textura crocante e sabor delicado.", qtd: "250g" },
+          { nome: "Arroz colorido", linha: "dia", preco: 30, desc: "Arroz soltinho com frango desfiado, cenoura em palitos e couve-flor. Leve, nutritivo e cheio de cor.", qtd: "300g" },
+          { nome: "Brócolis com alho", linha: "fit", preco: 25, desc: "Brócolis brasileiro salteados no alho dourado.", qtd: "250g" },
+          { nome: "Mix de Quinoa com Alho Poró", linha: "fit", preco: 23, desc: "Quinoa soltinha combinada ao sabor suave do alho-poró, formando um acompanhamento leve e nutritivo.", qtd: "250g" },
+          { nome: "Salada de Lentilha", linha: "dia", preco: 23, desc: "Lentilhas cozidas no ponto certo, combinadas com legumes e temperos frescos.", qtd: "250g" }
         ]
       },
       {
-        cat: "Acompanhamentos 🫘",
+        cat: "Caldos 🍲",
         pratos: [
-          { nome: "Feijão carioquinha com bacon", linha: "dia", preco: 16, desc: "Feijão carioquinha com bacon defumado e linguiça calabresa", qtd: "250g" },
-          { nome: "Feijão vermelho da casa", linha: "dia", preco: 16, desc: "Feijão vermelho temperado, simples e gostoso", qtd: "250g" },
+          { nome: "Caldo verde", linha: "caldos", preco: 30, desc: "Cremoso, aromático, com linguiça defumada e feito pra desacelerar o dia. Aquece por dentro.", qtd: "350ml" },
+          { nome: "Vaca Atolada", linha: "caldos", preco: 40, desc: "Costela bovina cozida lentamente com aipim até formar um caldo encorpado, rico e reconfortante. Um clássico da cozinha brasileira.", qtd: "500g" }
         ]
       },
       {
         cat: "Preparos Coringa 🧑‍🍳",
-        info: "Versátil para a semana toda — use em lanches, massas, arroz e muito mais!",
+        info: "Versátil para a semana toda — use em lanches, massas, arroz, tapioca e muito mais!",
         pratos: [
-          { nome: "Frango desfiado suculento", linha: "dia", preco: 24, desc: "Simples, bem temperado e versátil", qtd: "250g" },
+          { nome: "Carne moída temperadinha", linha: "fit", preco: 30, desc: "Carne moída refogada com alho, cebola e temperos frescos, pronta para acompanhar arroz, massas ou virar recheio de receitas criativas.", qtd: "350g" },
+          { nome: "Frango desfiado suculento", linha: "fit", preco: 30, desc: "Frango cozido e desfiado cuidadosamente, envolvido em um refogado leve.", qtd: "300g" }
         ]
       }
     ]
@@ -876,7 +939,7 @@ const hoje = new Date();
 // Aviso no topo
 // ─────────────────────────────────────────────
 document.getElementById('aviso-semana').textContent =
-  `${CARDAPIOS[semanaAtiva].label} · ${CARDAPIOS[semanaAtiva].descricao} · Pedidos até quinta-feira`;
+  `${CARDAPIOS[semanaAtiva].label} · ${CARDAPIOS[semanaAtiva].descricao}`;
 
 // ─────────────────────────────────────────────
 // Monta tabs e painéis de cardápio
@@ -891,11 +954,16 @@ painel.id = 'painel-A';
 
 let html = '';
 cd.grupos.forEach(grupo => {
-  html += `<div class="cat-label">${grupo.cat}</div>`;
+  const isCopa = grupo.pratos && grupo.pratos.length > 0 && grupo.pratos[0].linha === 'copa';
+  if (isCopa) {
+    html += `<div class="cat-label-copa">${grupo.cat.replace(/^[🇧🇷⚽\s]+/, '').trim()}</div>`;
+  } else {
+    html += `<div class="cat-label">${grupo.cat}</div>`;
+  }
   // Info padrão por categoria
   let infoTexto = grupo.info || null;
   if (!infoTexto) {
-    if (grupo.cat === 'Pratos principais') infoTexto = '🍽️ Porção para até 2 pessoas. O acompanhamento (arroz, salada, massa) fica por conta do cliente.';
+    if (grupo.cat.includes('Pratos principais')) infoTexto = '🍽️ Só o prato principal — combine com o acompanhamento que você preferir. Sugestão: confira a seção Acompanhamentos logo abaixo!';
     else if (grupo.cat.includes('PRATO FEITO') || grupo.cat.includes('Prato Feito')) infoTexto = '🍽️ Porção individual completa com prato principal + acompanhamentos. Simples, gostoso e prontinho!';
     else if (grupo.cat === 'Acompanhamentos') infoTexto = '🥗 Complementos perfeitos para acompanhar seu prato principal. Já vêm prontos para servir!';
     else if (grupo.cat === 'Aperitivos & Petiscos') infoTexto = '🥢 Entradas, petiscos e aperitivos. Ótimos para compartilhar ou abrir o apetite!';
@@ -903,11 +971,14 @@ cd.grupos.forEach(grupo => {
     else if (grupo.cat.includes('Preparos Coringa')) infoTexto = '🧑‍🍳 Ingredientes versáteis para facilitar sua rotina. Use em lanches, massas, arroz, tapioca e muito mais!';
   }
   if (infoTexto) {
-    html += '<div style="background:rgba(232,101,26,0.08);border-left:3px solid var(--laranja);border-radius:0 8px 8px 0;padding:9px 13px;margin-bottom:10px;font-size:11px;color:#5A2A00;line-height:1.55;">' + infoTexto + '</div>';
+    const infoStyle = isCopa
+      ? 'background:linear-gradient(135deg,#009C3B18,#FFDF0018);border-left:3px solid #009C3B;border-radius:0 8px 8px 0;padding:9px 13px;margin-bottom:10px;font-size:11px;color:#004D1A;line-height:1.55;font-weight:500;'
+      : 'background:rgba(232,101,26,0.08);border-left:3px solid var(--laranja);border-radius:0 8px 8px 0;padding:9px 13px;margin-bottom:10px;font-size:11px;color:#5A2A00;line-height:1.55;';
+    html += `<div style="${infoStyle}">` + infoTexto + '</div>';
   }
   grupo.pratos.forEach(p => {
     html += `
-    <div class="prato-item" data-nome="${p.nome}" data-preco="${p.preco}" onclick="togglePrato(this)">
+    <div class="${isCopa ? 'prato-item' : 'prato-item'}" style="${isCopa ? 'border-color:#009C3B55;background:#F0FBF4;' : ''}" data-nome="${p.nome}" data-preco="${p.preco}" onclick="togglePrato(this)">
       <div class="prato-check"><svg width="10" height="8" viewBox="0 0 10 8"><path d="M1 4l3 3 5-5" stroke="#fff" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
       <div class="prato-info">
         <div class="prato-nome">${p.nome}</div>
@@ -934,7 +1005,7 @@ if (window.monitoraEstoque) window.monitoraEstoque();
 else window.addEventListener('monitoraEstoqueReady', () => window.monitoraEstoque());
 
 function badgeLabel(linha) {
-  const map = { premium:'Premium', dia:'Dia a dia', intl:'Internacional', petisco:'Petisco', saude:'Saúde', caldos:'Caldos' };
+  const map = { premium:'Premium', dia:'Dia a dia', intl:'Internacional', petisco:'Petisco', saude:'Saúde', caldos:'Caldos', fit:'Fit', copa:'⚽ Copa' };
   return map[linha] || linha;
 }
 
